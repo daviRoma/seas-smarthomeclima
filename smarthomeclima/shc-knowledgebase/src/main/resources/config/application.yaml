@@ -1,0 +1,28 @@
+server:
+  servlet:
+    context-path: /smarthomeclima
+
+spring:
+  #context:
+    #component-scan:
+      #base-package: "it.univaq.disim.seas.smartclima"
+  application:
+    name: SmartHomeClima
+  # H2 Database
+  datasource:
+    url: jdbc:h2:mem:dcbapp
+    username: smarthomeclima
+    password: smarthomeclima
+    driver-class-name: org.h2.Driver
+  h2:
+    console:
+      enabled: true
+  jpa:
+    database-platfom: org.hibernate.dialect.H2Dialect
+    # properties:
+      # hibernate:
+        # dialect: org.hibernate.dialect.MariaDB53Dialect
+        #hbm2ddl.auto: update
+        #show_sql: true
+        #format_sql: true
+        

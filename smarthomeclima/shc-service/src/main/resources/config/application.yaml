@@ -1,0 +1,9 @@
+server:
+  servlet:
+    context-path: /api/smarthomeclima
+spring:
+  application:
+    name: SmartHomeClima
+  context:
+    component-scan:
+      base-package: "it.univaq.disim.seas.smarthomeclima"
