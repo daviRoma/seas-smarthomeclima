@@ -1,0 +1,90 @@
+<div class="mb-3">
+
+    <ng-container *ngIf="smartRooms && smartRooms.length">
+        <div class="row py-2 px-3">
+            <!-- for each smart room -->
+            <ng-container *ngFor="let smartRoom of smartRooms">
+                <div class="col-sm-6 col-md-4 px-2 py-2 mb-2">
+                    <mat-card class="smart-room-card">
+                        <mat-card-header class="smart-room-card-header">
+                            <mat-card-title>{{ smartRoom.number }}</mat-card-title>
+                            <mat-card-subtitle class="smart-room-card-subtitle">{{ smartRoom.type }}</mat-card-subtitle>
+                            <div class="row justify-content-between px-1" style="width: 100%;">
+                                <div class="col-sm-12 d-flex flex-column align-items-end">
+                                    <span><b>Temperature</b></span>
+                                </div>
+                                <div class="col-sm-12 d-flex flex-column align-items-end">
+                                    <span class="temperature-text {{
+                                        smartRoom.temperature && (
+                                            smartRoom.temperature <= 15 ? 'text-blue' : 
+                                            (smartRoom.temperature > 15 && smartRoom.temperature < 18) ? 'text-green' : 
+                                            (smartRoom.temperature >= 18 && smartRoom.temperature < 22) ? 'text-orange' : 
+                                            'text-red'
+                                        )}}">{{smartRoom.temperature ? smartRoom.temperature + '°' : '-'}}</span>
+                                </div>
+                            </div>
+                        </mat-card-header>
+
+                        <mat-card-content>
+                            <div class="row py-2">
+                                <div class="col-sm">
+                                    <div class="row">
+                                        <div class="col-sm-12 mb-1">
+                                            <span>Sensors: {{ smartRoom.sensors?.length }}</span>
+                                        </div>
+                                        <div class="col-sm-12">
+                                            <mat-list>
+                                                <ng-container *ngFor="let sensor of smartRoom.sensors">
+                                                    <mat-list-item class="{{ sensor.active ? 'sensor-active' : 'sensor-inactive'}}">{{ sensor.id }}, {{ sensor.type }}</mat-list-item>
+                                                    <mat-divider></mat-divider>
+                                                </ng-container>
+                                            </mat-list>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm">
+                                    <div class="row">
+                                        <div class="col-sm-12 mb-1">
+                                            <span>Actuators: {{ smartRoom.actuators?.length }}</span>
+                                        </div>
+                                        <div class="col-sm-12">
+                                            <mat-list>
+                                                <ng-container *ngFor="let actuator of smartRoom.actuators">
+                                                    <mat-list-item class="{{ actuator.active ? 'sensor-active' : 'sensor-inactive'}}">{{ actuator.id }}, {{ actuator.type }}</mat-list-item>
+                                                    <mat-divider></mat-divider>
+                                                </ng-container>
+                                            </mat-list>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </mat-card-content>
+                        <mat-card-actions>
+                                <div class="col-sm-12 col-md-12 d-flex flex-column align-items-end">
+                                    <a [routerLink]="['/smart-room/detail', smartRoom.id]" title="Go to smart room">
+                                        <button mat-raised-button color="primary">Go</button>
+                                    </a>
+                                </div>
+                        </mat-card-actions>
+                    </mat-card>
+                </div>
+            </ng-container>
+        </div>
+
+        <div class="row my-3">
+            <div class="col-sm px-4 d-flex flex-column align-items-end">
+                <button mat-fab color="primary" aria-label="Add Smart Room" (click)="openNewSmartRoomModal()">
+                    <mat-icon>add</mat-icon>
+                </button>
+            </div>
+        </div>
+    </ng-container>
+
+    <!-- Spinner -->
+    <div *ngIf="isLoading" class="mat-spinner-container">
+        <mat-progress-spinner class="mat-spinner-color" [diameter]="35" color="accent" mode="indeterminate">
+        </mat-progress-spinner>
+    </div>
+
+</div>

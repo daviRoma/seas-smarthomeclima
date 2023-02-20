@@ -1,0 +1,20 @@
+<!-- DELETE SMARTROOM DIALOG -->
+<div class="row justify-content-center mb-2">
+    <h2 class="col-auto mat-dialog-title justify-content-center">{{dialogConfig.title}}</h2>
+
+    <div class="col-12 mat-dialog-content justify-content-center my-3">
+        <div class="row">
+            <div class="col-md-12">
+                <span class="form-control-label">Are you sure to delete smart room?</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="mat-dialog-actions col-12 pb-2 my-1 justify-content-center">
+        <div class="text-right buttons-container">
+            <button mat-raised-button type="button" class="mx-1" (click)="cancel()">Cancel</button>
+            <button mat-raised-button type="button" class="mx-1" color="warn" (click)="confirm()">Confirm</button>
+        </div>
+    </div>
+</div>
+<!-- ./DELETE SMARTROOM DIALOG -->

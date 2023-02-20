@@ -1,0 +1,20 @@
+<!-- Mainbar component -->
+<div class="mainbar">
+    <mat-toolbar color="primary">
+        <div class="logo mx-2">
+            <img src="../../../assets/dist/img/smart-home-icon-4.png" class="responsive" />
+        </div>
+        <span>SmartHome Clima</span>
+        <span class="toolbar-spacer"></span>
+        <ng-container *ngIf="!isStarting; else started" >
+            <button mat-icon-button class="play_arrow-icon" aria-label="Play" (click)="startSmartHomeMonitoring()">
+                <mat-icon>play_arrow</mat-icon>
+            </button>
+        </ng-container>
+        <ng-template #started>
+            <button mat-icon-button class="stop-icon" aria-label="Stop" (click)="stopSmartHomeMonitoring()">
+                <mat-icon>stop</mat-icon>
+            </button>
+        </ng-template>
+    </mat-toolbar>
+</div>

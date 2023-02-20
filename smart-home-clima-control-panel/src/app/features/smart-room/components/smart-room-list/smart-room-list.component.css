@@ -1,0 +1,20 @@
+.temperature-text {
+    font-weight: 700;
+    font-size: 1.75rem;
+}
+
+.temperature-text.text-red {
+    color: #e02828;
+}
+
+.temperature-text.text-orange {
+    color: #e37640;
+}
+
+.temperature-text.text-green {
+    color: #d1e028;
+}
+
+.temperature-text.text-blue {
+    color: #2841e0;
+}

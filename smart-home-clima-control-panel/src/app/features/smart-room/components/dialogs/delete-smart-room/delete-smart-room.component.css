@@ -1,0 +1,23 @@
+.mat-dialog-title {
+    text-align: center;
+}
+
+.mat-dialog-content {
+    display: block;
+    margin: 10px 10px;
+    padding: 0px;
+    overflow: hidden !important;
+    height: auto;
+    text-align: center;
+}
+
+.mat-dialog-actions {
+    width: 100%;
+    margin: 0;
+}
+
+.buttons-container {
+    display: inline-block;
+    text-align: center !important;
+    width: 100%;
+}

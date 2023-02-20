@@ -1,0 +1,97 @@
+<!-- NEW/EDIT POLICY GROUP DIALOG -->
+<h2 mat-dialog-title class="dialog-title"> {{dialogConfig.title}} </h2>
+
+<form id="smartroom_form" [formGroup]="policyGroupForm" class="form-horizontal" (ngSubmit)="onSubmit($event)">
+
+    <div mat-dialog-content>
+        <div class="row">
+            <div class="col-12">
+
+                <div class="row">
+                    <!-- Mode -->
+                    <div class="col-6">
+                        <div class="form-group">
+                            <mat-form-field appearance="fill">
+                                <mat-label>Mode</mat-label>
+                                <mat-select formControlName="mode" requires>
+                                    <mat-option value="null">Select one...</mat-option>
+                                    <mat-option *ngFor="let mode of modes | keyvalue" [value]="mode.value">{{ mode.value }}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <!-- Season -->
+                    <div class="col-6">
+                        <div class="form-group">
+                            <mat-form-field appearance="fill">
+                                <mat-label>Season</mat-label>
+                                <mat-select formControlName="season" requires>
+                                    <mat-option value="null">Select one...</mat-option>
+                                    <mat-option *ngFor="let season of seasons | keyvalue" [value]="season.value">{{ season.value }}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div class="col-6">
+                        <div class="form-group">
+                            <mat-form-field appearance="fill">
+                                <mat-label>Start Date</mat-label>
+                                <input matInput [matDatepicker]="picker" formControlName="startDate" required>
+                                <mat-hint>DD/MM/YYYY</mat-hint>
+                                <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                                <mat-datepicker #picker></mat-datepicker>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <div class="form-group">
+                            <mat-form-field appearance="fill">
+                                <mat-label>End Date</mat-label>
+                                <input matInput [matDatepicker]="picker1" formControlName="endDate" required >
+                                <mat-hint>DD/MM/YYYY</mat-hint>
+                                <mat-datepicker-toggle matIconSuffix [for]="picker1"></mat-datepicker-toggle>
+                                <mat-datepicker #picker1></mat-datepicker>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error container -->
+                <div class="row">
+                    <div class="col-6 pt-2 pb-1 mt-2">
+                        <!-- Active -->
+                        <div class="col-6">
+                            <div class="form-group">
+                                <div class="mat-form-field">
+                                    <mat-checkbox formControlName="active">
+                                        <span [innerHTML]="'Active'"></span>
+                                    </mat-checkbox>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div mat-dialog-actions>
+        <div class="actions-button-container pb-2 px-2 d-flex justify-content-end">
+            <div class="mx-1 align-items-end">
+                <button mat-raised-button (click)="cancel()">Cancel</button>
+            </div>
+            <div class="mx-1 align-items-end">
+                <button mat-raised-button color="primary" type="submit">Confirm</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- ./NEW/EDIT POLICY GROUP DIALOG -->

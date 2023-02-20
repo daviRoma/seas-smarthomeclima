@@ -1,0 +1,47 @@
+.smart-room-detail-container {
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+
+.detail-elem-box {
+    border: 1px solid #cecece;
+    border-radius: 3px;
+    box-shadow: 1px 3px 3px #969595;
+}
+
+.temperature-text {
+    font-size: 4.2rem;
+    font-family: sans-serif;
+    line-height: 0.90;
+    color: #1f1f1f;
+}
+
+.temperature-icon {
+    color: #ff7700;
+}
+
+.policy-group-mode {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #094fa4;
+}
+
+.element-box {
+    position: relative;
+    height: fit-content;
+    width: 51.2%;
+}
+
+.element-box.sensors {
+    margin-top: -2rem;
+}
+
+.element-box.actuators {
+    top: -11rem;
+}
+
+.settings-container {
+    position: absolute;
+    top: 12rem;
+}

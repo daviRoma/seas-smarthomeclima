@@ -1,0 +1,65 @@
+<!-- NEW/EDIT SENSOR DIALOG -->
+<h2 mat-dialog-title class="dialog-title"> {{dialogConfig.title}} </h2>
+
+<div mat-dialog-content>
+    <ng-container *ngFor="let actuator of actuators">
+        <div class="row">
+            <div class="col-12">
+
+                <div class="row">
+                    <!-- Mode -->
+                    <div class="col-6">
+                        <div class="form-group">
+                            <mat-form-field appearance="fill">
+                                <mat-label>Type</mat-label>
+                                <mat-select [(value)]="actuator.type" requires>
+                                    <mat-option value="null">Select one...</mat-option>
+                                    <mat-option *ngFor="let type of types | keyvalue" [value]="type.value">{{ type.value }}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <!-- Active -->
+                    <div class="col-3">
+                        <div class="form-group">
+                            <div class="mat-form-field">
+                                <mat-checkbox [(ngModel)]="actuator.active">
+                                    <span [innerHTML]="'Active'"></span>
+                                </mat-checkbox>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delete button -->
+                    <div class="col-3">
+                        <button mat-icon-button class="" style="color:red;" (click)="deleteActuator(actuator.id)">
+                            <i class="fa fa-minus-square" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </ng-container>
+    <div *ngIf="actuators && actuators.length < 3" class="row">
+        <div class="col-12">
+            <button mat-icon-button color="primary" (click)="addActuator()">
+                <i class="fa fa-plus-square" aria-hidden="true"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div mat-dialog-actions>
+    <div class="actions-button-container pb-2 px-2 d-flex justify-content-end">
+        <div class="mx-1 align-items-end">
+            <button mat-raised-button (click)="cancel()">Cancel</button>
+        </div>
+        <div class="mx-1 align-items-end">
+            <button mat-raised-button color="primary" (click)="confirm()">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<!-- ./NEW/EDIT SENSOR DIALOG -->

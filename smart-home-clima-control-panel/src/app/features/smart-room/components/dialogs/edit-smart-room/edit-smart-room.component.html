@@ -1,0 +1,47 @@
+<!-- NEW/EDIT SMART ROOM DIALOG -->
+<h2 mat-dialog-title class="dialog-title"> {{ dialogConfig.title }} </h2>
+
+<form id="smartroom_form" [formGroup]="smartRoomForm" class="form-horizontal" (ngSubmit)="onSubmit($event)">
+
+    <div mat-dialog-content>
+        <div class="row">
+
+            <!-- Type -->
+            <div class="col-6">
+                <div class="form-group">
+                    <mat-form-field appearance="fill">
+                        <mat-label>Type</mat-label>
+                        <mat-select formControlName="type" requires>
+                            <mat-option value="null">Select one...</mat-option>
+                            <mat-option *ngFor="let type of smartRoomType | keyvalue" [value]="type.value">{{ type.value}}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <!-- Number -->
+            <div class="col-6">
+                <div class="form-group">
+                    <mat-form-field>
+                        <mat-label>Number</mat-label>
+                        <input matInput type="number" formControlName="number">
+                    </mat-form-field>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div mat-dialog-actions>
+        <div class="actions-button-container pb-2 px-2 d-flex justify-content-end">
+            <div class="mx-1 align-items-end">
+                <button mat-raised-button (click)="cancel()">Cancel</button>
+            </div>
+            <div class="mx-1 align-items-end">
+                <button mat-raised-button color="primary" type="submit">Confirm</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- ./NEW/EDIT SMART ROOM DIALOG -->

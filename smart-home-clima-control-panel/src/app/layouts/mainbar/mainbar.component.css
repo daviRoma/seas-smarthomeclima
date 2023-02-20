@@ -1,0 +1,14 @@
+.mat-toolbar.mat-primary {
+    background: #1e526d;
+    color: #fff;
+}
+
+.responsive {
+    width: 2.75rem;
+    max-width: 3rem;
+    height: auto;
+}
+
+.toolbar-spacer {
+    flex: 1 1 auto;
+}
