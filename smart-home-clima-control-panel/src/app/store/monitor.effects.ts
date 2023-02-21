@@ -6,11 +6,11 @@ import { of } from 'rxjs';
 
 import { MonitoringService } from 'src/app/services/monitoring.service';
 
-import { ControlPanelActionTypes } from 'src/app/store/control-panel.actions';
-import { ControlPanel } from '../models/control-panel.model';
+import { MonitorActionTypes } from 'src/app/store/monitor.actions';
+import { Monitor } from '../models/monitor.model';
 
 @Injectable()
-export class ControlPanelEffects {
+export class MonitorEffects {
     constructor(
         private actions: Actions,
         private monitoringService: MonitoringService
@@ -18,13 +18,13 @@ export class ControlPanelEffects {
 
     public startMonitoring = createEffect(() =>
         this.actions.pipe(
-            ofType(ControlPanelActionTypes.START_MONITORING),
+            ofType(MonitorActionTypes.START_MONITORING),
             switchMap(() =>
                 this.monitoringService.startMonitoring().pipe(
                     map(
-                        (response: any) => ({ type: ControlPanelActionTypes.START_MONITORING_SUCCESS, payload: { id: 1, isStarted: true, channels: [] } as ControlPanel})
+                        (response: any) => ({ type: MonitorActionTypes.START_MONITORING_SUCCESS, payload: { id: 1, isStarted: true, channels: [] } as Monitor})
                     ),
-                    catchError((error) => of({type: ControlPanelActionTypes.START_MONITORING_FAILURE, payload: error}))
+                    catchError((error) => of({type: MonitorActionTypes.START_MONITORING_FAILURE, payload: error}))
                 )
             )
         )
@@ -32,13 +32,13 @@ export class ControlPanelEffects {
 
     public stopMonitoring = createEffect(() =>
         this.actions.pipe(
-            ofType(ControlPanelActionTypes.STOP_MONITORING),
+            ofType(MonitorActionTypes.STOP_MONITORING),
             switchMap(() =>
                 this.monitoringService.startMonitoring().pipe(
                     map(
-                        (response: any) => ({ type: ControlPanelActionTypes.STOP_MONITORING, payload: { id: 1, isStarted: false, channels: [] } as ControlPanel})
+                        (response: any) => ({ type: MonitorActionTypes.STOP_MONITORING, payload: { id: 1, isStarted: false, channels: [] } as Monitor})
                     ),
-                    catchError((error) => of({type: ControlPanelActionTypes.STOP_MONITORING, payload: error}))
+                    catchError((error) => of({type: MonitorActionTypes.STOP_MONITORING, payload: error}))
                 )
             )
         )

@@ -16,6 +16,7 @@ export enum SmartRoomActionTypes {
   UPDATE_SUCCESS = '[SmartRoom] Update Success',
   UPDATE_FAILURE = '[SmartRoom] Update Failure',
   UPDATE_MANUALLY = '[SmartRoom] Update Manually',
+  UPDATE_MANY_MANUALLY = '[SmartRoom] Update ManyManually',
   DELETE = '[SmartRoom] Delete',
   DELETE_SUCCESS = '[SmartRoom] Delete Success',
   DELETE_FAILURE = '[SmartRoom] Delete Failure'
@@ -83,6 +84,11 @@ export const SmartRoomUpdateFailureAction = createAction(
 export const SmartRoomUpdateManuallyAction = createAction(
   SmartRoomActionTypes.UPDATE_MANUALLY,
   props<{payload: SmartRoom}>()
+);
+
+export const SmartRoomUpdateManyManuallyAction = createAction(
+  SmartRoomActionTypes.UPDATE_MANY_MANUALLY,
+  props<{payload: SmartRoom[]}>()
 );
 
 export const SmartRoomDeleteAction = createAction(

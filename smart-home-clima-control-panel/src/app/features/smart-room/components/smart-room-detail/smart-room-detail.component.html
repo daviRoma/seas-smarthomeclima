@@ -1,11 +1,11 @@
 <!-- SMART ROOM DETAIL -->
 <div class="mb-2">
     
-    <div class="row px-3 py-3 smart-room-detail-container">
+    <div class="row px-3 py-3 smart-room-detail-container justify-content-md-center">
         <!-- Temperature -->
-        <div class="col-sm-3 col-md-2 mx-3 mb-2">
-            <div class="row pt-3 pb-4 detail-elem-box">
-                <div class="col-sm-2 col-md-2 me-1 text-left temperature-icon">
+        <div class="col-sm-3 col-md-2 mb-2">
+            <div class="row py-4 smart-room-custom-card card-fixed">
+                <div class="col-sm-3 col-md-3 me-1 text-left temperature-icon">
                     <i class="fa fa-thermometer-half fa-4x" aria-hidden="true"></i>
                 </div>
                 <div class="col-sm-4 col-md-4 ms-2">
@@ -17,18 +17,26 @@
         </div>
         
         <!-- Policy Group -->
-        <div class="col-sm-6 col-md-4 me-3 mb-2">
-            <div class="row pt-2 pb-1 detail-elem-box">
+        <div class="col-sm-6 col-md-4 mb-2">
+            <div class="row pt-2 pb-1 smart-room-custom-card card-fixed">
                 <div class="col-sm-12 col-md-12 py-1">
-                    <span class="policy-group-mode">{{ policyGroup ? policyGroup.mode : ''}} Mode</span>
+                    <span class="policy-group-mode">Policy Group</span>
+                </div>
+                <div class="col-sm-4 col-md-5 py-1">
+                    <span><b>Mode</b></span><br>
+                    <span class="{{ policyGroup.mode == 'ECO' ? 'text-green' : policyGroup.mode == 'COMFORT' ? 'text-blue' : 'text-grey'}}">{{ policyGroup ? policyGroup.mode : '-' }}</span>
+                </div>
+                <div class="col-sm-4 col-md-5 py-1">
+                    <span><b>Season</b></span><br>
+                    <span>{{ policyGroup ? policyGroup.season : '-'}}</span>
                 </div>
                 <div class="col-sm-4 col-md-5 py-1">
                     <span><b>Start</b></span><br>
-                    <span>{{ policyGroup.startDate | date }}</span>
+                    <span>{{ policyGroup ? (policyGroup.startDate | date) : '-' }}</span>
                 </div>
                 <div class="col-sm-4 col-md-5 py-1">
                     <span><b>End</b></span><br>
-                    <span>{{ policyGroup.endDate | date }}</span>
+                    <span>{{ policyGroup ? (policyGroup.endDate | date) : '-' }}</span>
                 </div>
                 <div class="col-sm-3 col-md-2 py-1 d-flex flex-column align-items-end">
                     <button mat-icon-button class="" (click)="openEditPolicyGroup()">
@@ -41,7 +49,7 @@
         
         <!-- Active Policy -->
         <div class="col-sm-8 col-md-5 mb-2">
-            <div class="row py-2 detail-elem-box">
+            <div class="row py-2 smart-room-custom-card card-fixed">
                 <div class="col-sm-12 col-md-12 py-1">
                     <span class="policy-group-mode">Active Policy</span>
                 </div>
@@ -75,8 +83,8 @@
         </div>
         
         <!-- Sensors -->
-        <div class="col-sm-8 col-md-6 mx-3 element-box sensors">
-            <div class="row py-2 detail-elem-box">
+        <div class="col-sm-5 col-md-5 mt-3 me-3">
+            <div class="row py-2 smart-room-custom-card">
                 <div class="col-sm-12 col-md-12 py-1">
                     <span class="policy-group-mode">Sensors</span>
                 </div>
@@ -106,23 +114,23 @@
         </div>
         
         <!-- chart -->
-        <div class="col-sm-8 col-md-5 mt-3">
-            <div class="row py-2 detail-elem-box">
+        <div class="col-sm-7 col-md-6 mt-3">
+            <div class="row py-2 smart-room-custom-card">
                 <div class="col-md-12">
-                    <canvas baseChart width="700vh" height="400"
-                    [type]="'line'"
-                    [data]="lineChartData"
-                    [options]="lineChartOptions"
-                    [legend]="lineChartLegend">
-                </canvas>
+                    <canvas baseChart width="600" height="400"
+                        [type]="'line'"
+                        [data]="lineChartData"
+                        [options]="lineChartOptions"
+                        [legend]="lineChartLegend">
+                    </canvas>
                 
+                </div>
             </div>
-        </div>
         </div>
     
         <!-- Actuators -->
-        <div class="col-sm-8 col-md-6 mx-3 element-box actuators">
-            <div class="row py-2 detail-elem-box">
+        <div class="col-sm-5 col-md-5 mx-3">
+            <div class="row py-2 smart-room-custom-card">
                 <div class="col-sm-12 col-md-12 py-1">
                     <span class="policy-group-mode">Actuators</span>
                 </div>
@@ -150,6 +158,18 @@
                 </div>
             </div>
         </div>
+
+                <!-- chart -->
+                <div class="col-sm-7 col-md-6 mt-3">
+                    <div class="row py-2 smart-room-custom-card">
+                        <div class="col-md-12">
+                            <canvas baseChart width="600" height="400" [type]="'line'" [data]="lineChartData"
+                                [options]="lineChartOptions" [legend]="lineChartLegend">
+                            </canvas>
+                
+                        </div>
+                    </div>
+                </div>
     </div>
 
 </div>

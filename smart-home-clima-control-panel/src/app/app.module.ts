@@ -19,7 +19,7 @@ import { PolicyGroupEffects } from './features/policy-group/store/effects/policy
 import { PolicyEffects } from './features/policy/store/effects/policy.effects';
 import { SensorEffects } from './features/sensor/store/effects/sensor.effects';
 import { ActuatorEffects } from './features/actuator/store/effects/actuator.effects';
-import { ControlPanelEffects } from './store/control-panel.effects';
+import { MonitorEffects } from './store/monitor.effects';
 
 import { reducers } from 'src/app/state/app.state';
 
@@ -89,7 +89,7 @@ const MQTT_SERVICE_OPTIONS: IMqttServiceOptions = {
       PolicyEffects,
       SensorEffects,
       ActuatorEffects,
-      ControlPanelEffects
+      MonitorEffects
     ]),
     StoreModule.forRoot(reducers)
   ],

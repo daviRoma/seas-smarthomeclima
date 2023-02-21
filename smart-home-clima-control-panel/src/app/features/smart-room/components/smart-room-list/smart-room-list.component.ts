@@ -4,10 +4,6 @@ import { Router } from '@angular/router';
 import { select, Store } from '@ngrx/store';
 
 import { SmartRoom } from 'src/app/models/smart-room.model';
-import { Policy } from 'src/app/models/policy.model';
-import { PolicyGroup } from 'src/app/models/policy-group.model';
-import { Sensor } from 'src/app/models/sensor.model';
-import { Actuator } from 'src/app/models/actuator.model';
 
 import { EditSmartRoomComponent } from '../dialogs/edit-smart-room/edit-smart-room.component';
 import { Observable, Subject, Subscription, takeUntil } from 'rxjs';

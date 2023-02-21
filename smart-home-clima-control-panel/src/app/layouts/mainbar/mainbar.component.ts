@@ -5,10 +5,10 @@ import { Store } from '@ngrx/store';
 import { Subject, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-import * as controlPanelSelector from 'src/app/store/control-panel.selectors';
+import * as controlPanelSelector from 'src/app/store/monitor.selectors';
 
-import { ControlPanelStartMonitoringAction, ControlPanelStopMonitoringAction } from 'src/app/store/control-panel.actions';
-import { ControlPanel } from 'src/app/models/control-panel.model';
+import { ControlPanelStartMonitoringAction, ControlPanelStopMonitoringAction } from 'src/app/store/monitor.actions';
+import { ControlPanel } from 'src/app/models/monitor.model';
 
 @Component({
   selector: 'app-mainbar',

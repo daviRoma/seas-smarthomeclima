@@ -1,8 +1,8 @@
 /**
- * Control Panel model
+ * Monitor model
  */
 
-export class ControlPanel {
+export class Monitor {
     id: number = 1;
     isStarted: boolean = false;
     channels: Channel[] = [];
