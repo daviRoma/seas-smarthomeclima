@@ -21,16 +21,7 @@ export const SmartRoomDialogConf = {
 export const EditDialogConf = {
   minWidth: '60%',
   maxWidth: '100%',
-  position: { top: '6%' },
-  data: {
-    smartRoom: null,
-    dialogConfig
-  },
-};
-
-export const PolicyDialogConf = {
-  minWidth: '60%',
-  maxWidth: '100%',
+  maxHeight: '80%',
   position: { top: '6%' },
   data: {
     smartRoom: null,

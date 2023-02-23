@@ -1,5 +1,4 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
-import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 import { MatDialog } from '@angular/material/dialog';
@@ -15,16 +14,15 @@ import { EditPolicyDialogComponent } from 'src/app/features/policy/components/di
 import { EditSensorDialogComponent } from 'src/app/features/sensor/components/dialogs/edit-sensor-dialog/edit-sensor-dialog.component';
 import { EditActuatorDialogComponent } from 'src/app/features/actuator/components/dialogs/edit-actuator-dialog/edit-actuator-dialog.component';
 
-import {
-  PolicyDialogConf,
-  EditDialogConf
-} from 'src/app/config/dialog.config';
+import { EditDialogConf } from 'src/app/config/dialog.config';
 
 import {
   baseLineChartLabels,
-  chartDatasetsElem,
-  chartDatasetsElem2
+  chartDatasetsTemperature,
+  chartDatasetsMotion,
+  chartDatasetsPower
 } from 'src/app/config/chart.config';
+
 @Component({
   selector: 'app-smart-room-detail',
   templateUrl: './smart-room-detail.component.html',
@@ -33,13 +31,39 @@ import {
 export class SmartRoomDetailComponent implements OnInit, OnDestroy {
   @Input() smartRoom!: SmartRoom;
   @Input() 
-  public set temperatureValue(value: number) {
-    console.log("[Set]::[temperatureValue]", value);
-    this.lineChartData.datasets[0].data.push(value);
+  public set temperatureValues(values: number[]) {
+    console.log("[Set]::[temperatureValues]", values);
+    this._temperatureValues = [...values];
+    this.lineChartData.datasets[0].data = [...values];
     this.lineChartData = {...this.lineChartData};
   }
-  
-  private _temperatureValues: any[] | undefined ;
+  public get temperatureValues(): number[] {
+    return this._temperatureValues;
+  }
+
+  @Input() 
+  public set motionValues(values: number[]) {
+    console.log("[Set]::[motionValues]", values);
+    this._motionValues = [...values];
+    this.lineChartData.datasets[1].data = [...values];
+    this.lineChartData = {...this.lineChartData};
+  }
+  public get motionValues(): number[] {
+    return this._motionValues;
+  }
+
+  @Input() 
+  public set actuatorValues(values: number[]) {
+    console.log("[Set]::[actuatorValues]", values);
+    this._motionValues = [...values];
+    this.powerLineChartData.datasets[0].data = [...values];
+    this.powerLineChartData = {...this.lineChartData};
+  }
+
+  private _temperatureValues: number[];
+  private _motionValues: number[];
+
+  private subscription: Subscription = new Subscription();
 
   public policyGroup!: PolicyGroup
   public policy!: Policy
@@ -49,38 +73,34 @@ export class SmartRoomDetailComponent implements OnInit, OnDestroy {
   public editSensorDialogRef: any;
   public editActuatorDialogRef: any;
 
-  private subscription: Subscription = new Subscription();
-
-  public chartDatasetConfig: any;
-
   public lineChartData: ChartConfiguration<'line'>['data'] = {
-      labels: baseLineChartLabels,
-      datasets: [chartDatasetsElem, chartDatasetsElem2]
-      
-    };
+    labels: baseLineChartLabels,
+    datasets: [chartDatasetsTemperature, chartDatasetsMotion]
+  };
+  public powerLineChartData: ChartConfiguration<'line'>['data'] = {
+    labels: baseLineChartLabels,
+    datasets: [chartDatasetsPower]
+  };
   public lineChartOptions: ChartOptions<'line'> = {
     responsive: true
   };
   public lineChartLegend = true;
 
   constructor(
-    public dialog: MatDialog,
-    private router: Router
+    public dialog: MatDialog
   ) {
-    
-    this.editPolicyGroupDialogRef = { ...PolicyDialogConf };
+    this.editPolicyGroupDialogRef = { ...EditDialogConf };
     this.editPolicyDialogRef = { ...EditDialogConf };
     this.editSensorDialogRef = { ...EditDialogConf };
     this.editActuatorDialogRef = { ...EditDialogConf };
 
-    // this.chartDatasetConfig = { ...chartDatasetsElem, data: this.temperatureValues};
+    this._temperatureValues = [];
+    this._motionValues = [];
   }
 
   ngOnInit(): void {
     this.policyGroup = this.smartRoom.policyGroups ? this.smartRoom.policyGroups.filter(pg => pg.active)[0] : new PolicyGroup();
     this.policy = this.policyGroup && this.policyGroup.policies ? this.policyGroup.policies.filter(p => p.active)[0] : new Policy();
-
-    // if (this.temperatureValues) this.temperatureValues.forEach(elem => this.lineChartData.datasets[0].data.push(elem.value));
   }
 
   public openEditPolicyGroup(): void {
@@ -156,8 +176,6 @@ export class SmartRoomDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    //Called once, before the instance is destroyed.
-    //Add 'implements OnDestroy' to the class.
     this.subscription.unsubscribe();
   }
   

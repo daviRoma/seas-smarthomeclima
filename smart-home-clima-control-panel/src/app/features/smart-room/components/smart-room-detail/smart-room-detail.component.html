@@ -159,17 +159,23 @@
             </div>
         </div>
 
-                <!-- chart -->
-                <div class="col-sm-7 col-md-6 mt-3">
-                    <div class="row py-2 smart-room-custom-card">
-                        <div class="col-md-12">
-                            <canvas baseChart width="600" height="400" [type]="'line'" [data]="lineChartData"
-                                [options]="lineChartOptions" [legend]="lineChartLegend">
-                            </canvas>
-                
-                        </div>
-                    </div>
+        <!-- Actuator Chart -->
+        <div class="col-sm-7 col-md-6 mt-3">
+            <div class="row py-2 smart-room-custom-card">
+                <div class="col-md-12">
+                    <canvas 
+                        baseChart 
+                        width="600" 
+                        height="400" 
+                        [type]="'line'" 
+                        [data]="powerLineChartData"
+                        [options]="lineChartOptions" 
+                        [legend]="lineChartLegend">
+                    </canvas>
+        
                 </div>
+            </div>
+        </div>
     </div>
 
 </div>

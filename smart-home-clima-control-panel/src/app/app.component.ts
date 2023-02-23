@@ -27,11 +27,13 @@ export class AppComponent {
   public smartRooms?: SmartRoom[];
   public monitor!: Monitor;
 
+  private subscribed: Boolean;
+
   constructor(
     private readonly eventMqtt: EventMqttService,
     private store: Store<AppState>
   ) {
-
+    this.subscribed = false;
   }
 
   ngOnInit(): void {
@@ -65,16 +67,19 @@ export class AppComponent {
         if (response.length) {
           this.smartRooms = response;
 
-          this.smartRooms.forEach(smartRoom => {
-            // Subscribe to sensor topics
-            smartRoom.sensors?.forEach(sensor => {
-              this.subscribeToSensorTopic(`smartroom/${smartRoom.id}/sensor/${sensor.id}`);
+          if (!this.subscribed) {
+            this.smartRooms.forEach(smartRoom => {
+              // Subscribe to sensor topics
+              smartRoom.sensors?.forEach(sensor => {
+                this.subscribeToSensorTopic(`smartroom/${smartRoom.id}/sensor/${sensor.id}`);
+              });
+              // Subscribe to actuator topics
+              smartRoom.actuators?.forEach(actuator => {
+                this.subscribeToActuatorTopic(`monitor/smartroom/${smartRoom.id}/actuator/${actuator.id}`);
+              })
             });
-            // Subscribe to actuator topics
-            smartRoom.actuators?.forEach(actuator => {
-              this.subscribeToActuatorTopic(`monitor/smartroom/${smartRoom.id}/actuator/${actuator.id}`);
-            })
-          });
+            this.subscribed = true;
+          }
 
         }
       });
@@ -124,7 +129,8 @@ export class AppComponent {
 
           this.smartRooms?.forEach(smartRoom => {
             let actuators = smartRoom.actuators?.map(act => {
-              if (act.id == item.id) act.power = Number(item.value);
+              console.log('ACT',act);
+              if (act.id == item.id) act.power ? act.power.push(Number(item.value)) : act.power = [Number(item.value)];
               return act;
             }); 
             this.store.dispatch(SmartRoomUpdateManuallyAction({payload: {...smartRoom, actuators: actuators}}));

@@ -19,7 +19,6 @@ import { MatDialog } from '@angular/material/dialog';
 
 import { Channel, Monitor } from 'src/app/models/monitor.model';
 import { SmartRoom, SmartRoomRequest } from 'src/app/models/smart-room.model';
-import { Sensor } from 'src/app/models/sensor.model';
 
 import { SmartRoomDialogConf, DeleteDialogConf } from 'src/app/config/dialog.config';
 
@@ -37,7 +36,10 @@ export class DetailComponent implements OnInit, OnDestroy {
 
   public isLoading: boolean;
   public isStart: boolean;
-  public temperatureValue: number;
+
+  public temperatureValues: number[];
+  public motionValues: number[];
+  public powerValues: number[];
   
   public editSmartRoomDialogRef: any;
   public deleteSmartRoomDialogRef: any;
@@ -55,7 +57,9 @@ export class DetailComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.isStart = true;
 
-    this.temperatureValue = 0;
+    this.temperatureValues = [];
+    this.motionValues = [];
+    this.powerValues = [];
 
     this.editSmartRoomDialogRef = { ...SmartRoomDialogConf };
     this.deleteSmartRoomDialogRef = { ...DeleteDialogConf };
@@ -140,7 +144,12 @@ export class DetailComponent implements OnInit, OnDestroy {
         if (smartRoom) {
           this.smartRoom = { ...smartRoom };
           let temperatureSensor = this.smartRoom.sensors?.find(el => el.type == 'TEMPERATURE');
-          this.temperatureValue = temperatureSensor?.values ? temperatureSensor.values[temperatureSensor.values.length - 1] : 0;
+          let motionSensor = this.smartRoom.sensors?.find(el => el.type == 'MOTION');
+          let powerActuator = this.smartRoom.actuators?.find(el => el.power);
+
+          this.temperatureValues = temperatureSensor?.values ? [...temperatureSensor.values] : [];
+          this.motionValues = motionSensor?.values ? [...motionSensor.values] : [];
+          this.powerValues = powerActuator?.power ? [...powerActuator.power] : [];
           this.loadMonitorData();
         }
         this.isLoading = false;

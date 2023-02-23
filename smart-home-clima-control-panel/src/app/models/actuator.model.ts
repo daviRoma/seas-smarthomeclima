@@ -4,7 +4,7 @@ export class Actuator {
     id!: number;
     type?: string;
     active?: boolean;
-    power: number = 0;
+    power: number[] = [];
     smartRoom!: SmartRoom
 }
 
