@@ -56,6 +56,15 @@ public class ActuatorServiceImpl implements ActuatorService {
 	}
 
 	@Override
+	public void upsertMultipleActuators(List<Actuator> actuators) throws BusinessException {
+		try {
+			this.actuatorRepository.saveAll(actuators);
+		} catch (DataAccessException e) {
+            throw new BusinessException(e);
+        }		
+	}
+	
+	@Override
 	public void deleteActuator(Integer id) throws BusinessException {
 		try {
 			this.actuatorRepository.deleteById(id);

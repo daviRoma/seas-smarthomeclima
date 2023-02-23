@@ -1,7 +1,7 @@
 package it.univaq.disim.seas.smarthomeclima.planner;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +14,7 @@ import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.Actuator;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.ActuatorType;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.Configuration;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.Configurator;
+import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.Mode;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.SensorType;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.model.Execution;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.Pianification;
@@ -41,7 +42,7 @@ public class Planner {
 	 * @param clock
 	 * @throws BusinessException 
 	 */
-	public void planning(Map<Integer, HashMap<SensorType, Integer>> smartRoomStates, Map<Integer, Configuration> actualConfigurations, Calendar clock) throws BusinessException {
+	public void planning(Map<Integer, HashMap<SensorType, Integer>> smartRoomStates, Map<Integer, Configuration> actualConfigurations, LocalDateTime clock) throws BusinessException {
 		LOGGER.info("[Planner]::[planning] --- Run planner");
 		
 		Map<Integer, ArrayList<Execution>> actions = new HashMap<Integer, ArrayList<Execution>>();
@@ -78,46 +79,52 @@ public class Planner {
 					this.pianificationService.updatePianification(this.activePianifications.get(entry.getKey()));
 				}
 			} else {
-				// ottengo il set dei possibili valori dei power impostabili per gli attuatori secondo la modalità corrente
-				ArrayList<Integer> modeValues = Configurator.MODE_POWER.get(
-					actualConfigurations.get(entry.getKey()).getPolicyGroup().getMode()
-				);
+				Mode currentMode = actualConfigurations.get(entry.getKey()).getPolicyGroup().getMode();
+				
+				// get the maximum power values from the current mode
+				ArrayList<Integer> modeValues = Configurator.MODE_POWER.get(currentMode);
 				
 				// based on smart room state check if is necessary to activate a plan
 
 				// Temperature
-				Integer temperature = entry.getValue().get(SensorType.TEMPERATURE);
+				Integer temperatureCode = entry.getValue().get(SensorType.TEMPERATURE);
 				Integer motion = entry.getValue().get(SensorType.MOTION);
 				Integer contact = entry.getValue().get(SensorType.CONTACT);
 				
-				if (motion == 1 || temperature == Configurator.LOW_TEMP_CODE || temperature == Configurator.HIGH_TEMP_CODE) {
+				// Set target pianification time
+				LocalDateTime targetPianificationTime = clock;
+
+				
+				// Predictive case
+				if (motion == 1 || temperatureCode == Configurator.LOW_TEMP_CODE || temperatureCode == Configurator.HIGH_TEMP_CODE) {
 					if (actualConfigurations.get(entry.getKey()).getPolicyGroup().getSeason().equals(Season.WINTER)) {
 						// Get all actuator of type RADIATOR
 						for (Actuator act : actualConfigurations.get(entry.getKey()).getSmartRoom().getActuators()) {
 							if (act.getType().equals(ActuatorType.RADIATOR)) {
-								actions.get(entry.getKey()).add(this.setRadiator(temperature, modeValues.get(0), act.getId()));								
+								actions.get(entry.getKey()).add(this.setRadiator(temperatureCode, modeValues.get(0), act.getId()));								
 							}
 						}
 					} else {
 						for (Actuator act : actualConfigurations.get(entry.getKey()).getSmartRoom().getActuators()) {
 							if (act.getType().equals(ActuatorType.CONDITIONER)) {
-								actions.get(entry.getKey()).add(this.setConditioner(temperature, modeValues.get(0), act.getId()));								
+								actions.get(entry.getKey()).add(this.setConditioner(temperatureCode, modeValues.get(0), act.getId()));								
 							}
 						}
 					}
+					targetPianificationTime.plusMinutes(Configurator.MODE_DURATION.get(actualConfigurations.get(entry.getKey()).getPolicyGroup().getMode()));
 					// Danger case
-				} else if (motion == 1 || temperature == Configurator.DANGER_LOW_TEMP_CODE || temperature == Configurator.DANGER_HIGH_TEMP_CODE) {
+				} else if (motion == 1 || temperatureCode == Configurator.DANGER_LOW_TEMP_CODE || temperatureCode == Configurator.DANGER_HIGH_TEMP_CODE) {
 					if (actualConfigurations.get(entry.getKey()).getPolicyGroup().getSeason().equals(Season.WINTER)) {
 						// Get all actuator of type RADIATOR
 						for (Actuator act : actualConfigurations.get(entry.getKey()).getSmartRoom().getActuators()) {
 							if (act.getType().equals(ActuatorType.RADIATOR)) {
-								actions.get(entry.getKey()).add(this.setRadiator(temperature, modeValues.size() > 1 ? modeValues.get(1) : modeValues.get(0), act.getId()));								
+								actions.get(entry.getKey()).add(this.setRadiator(temperatureCode, modeValues.size() > 1 ? modeValues.get(1) : modeValues.get(0), act.getId()));								
 							}
 						}
 					} else {
 						for (Actuator act : actualConfigurations.get(entry.getKey()).getSmartRoom().getActuators()) {
 							if (act.getType().equals(ActuatorType.CONDITIONER)) {
-								actions.get(entry.getKey()).add(this.setConditioner(temperature, modeValues.size() > 1 ? modeValues.get(1) : modeValues.get(0), act.getId()));								
+								actions.get(entry.getKey()).add(this.setConditioner(temperatureCode, modeValues.size() > 1 ? modeValues.get(1) : modeValues.get(0), act.getId()));								
 							}
 						}
 					}
@@ -127,17 +134,44 @@ public class Planner {
 							actions.get(entry.getKey()).add(this.closeWindow(contact, act.getId()));								
 						}
 					}
+					targetPianificationTime.plusMinutes(Configurator.MODE_DURATION.get(actualConfigurations.get(entry.getKey()).getPolicyGroup().getMode()));
+
+					// Danger Priority case
+				} else if (temperatureCode == Configurator.DANGER_PRIORITY_LOW_TEMP_CODE || temperatureCode == Configurator.DANGER_PRIORITY_LOW_TEMP_CODE) {
+					// Set current mode to POWER
+					currentMode = Mode.POWER;
+					
+					if (actualConfigurations.get(entry.getKey()).getPolicyGroup().getSeason().equals(Season.WINTER)) {
+						// Get all actuator of type RADIATOR
+						for (Actuator act : actualConfigurations.get(entry.getKey()).getSmartRoom().getActuators()) {
+							if (act.getType().equals(ActuatorType.RADIATOR)) {
+								// use the maximum power of the power mode
+								actions.get(entry.getKey()).add(this.setRadiator(temperatureCode, Configurator.MODE_POWER.get(Mode.POWER).get(Configurator.MODE_POWER.get(Mode.POWER).size()-1), act.getId()));								
+							}
+						}
+					} else {
+						for (Actuator act : actualConfigurations.get(entry.getKey()).getSmartRoom().getActuators()) {
+							if (act.getType().equals(ActuatorType.CONDITIONER)) {
+								actions.get(entry.getKey()).add(this.setConditioner(temperatureCode, Configurator.MODE_POWER.get(Mode.POWER).get(Configurator.MODE_POWER.get(Mode.POWER).size()-1), act.getId()));								
+							}
+						}
+					}
+					// close window
+					for (Actuator act : actualConfigurations.get(entry.getKey()).getSmartRoom().getActuators()) {
+						if (act.getType().equals(ActuatorType.WINDOW)) {
+							actions.get(entry.getKey()).add(this.closeWindow(contact, act.getId()));								
+						}
+					}
+					targetPianificationTime.plusMinutes(Configurator.MODE_DURATION.get(Mode.POWER));
 				}
 				
-				// Create pianification
-				Calendar targetTime = clock;
-				targetTime.add(Calendar.MINUTE, Configurator.MODE_DURATION.get(actualConfigurations.get(entry.getKey()).getPolicyGroup().getMode()));
 				
+				// Create pianification
 				Pianification pianification = new Pianification(
-					actualConfigurations.get(entry.getKey()).getPolicyGroup().getMode(), 
+					currentMode, 
 					true,
 					clock,
-					targetTime,
+					targetPianificationTime,
 					actualConfigurations.get(entry.getKey()).getSmartRoom()
 				);
 				

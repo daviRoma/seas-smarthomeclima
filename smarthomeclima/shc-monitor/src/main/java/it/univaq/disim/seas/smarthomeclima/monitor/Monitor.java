@@ -1,5 +1,7 @@
 package it.univaq.disim.seas.smarthomeclima.monitor;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -38,14 +40,18 @@ public class Monitor extends Thread {
 	@Autowired
     private MqttBroker brokerActuators;
     
-    private Calendar clock = Calendar.getInstance();
+    private LocalDateTime clock;
     private Map<Integer, SmartRoom> smartRooms = new HashMap<Integer, SmartRoom>();
     
     
-    public Monitor() throws BusinessException {
+    public Monitor() {
     	// inizialize the clock
-    	this.clock.set(Calendar.HOUR_OF_DAY, 0);
-    	this.clock.set(Calendar.MINUTE, 0);
+    	this.clock = LocalDateTime.now();
+    }
+    
+    // testing purpose
+    public void setClock() {
+    	this.clock = LocalDateTime.of(2023, 1, 1, 1, 0);
     }
     
     /**
@@ -61,6 +67,7 @@ public class Monitor extends Thread {
     			this.smartRooms.put(sm.getId(), sm);
     		}
     	} catch (BusinessException e) {
+    		LOGGER.error("[Monitor]::[run] --- " + e.getMessage());
     		e.printStackTrace();
     	}
     	
@@ -69,12 +76,12 @@ public class Monitor extends Thread {
     	this.brokerActuators.subscribe(MessageChannel.ACTUATOR_CHANNEL);
 
         while (true) {
-        
+        	LOGGER.info("[Monitor]::[run] --- Clock: " + this.clock.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 			try {
 				if (!this.brokerSensors.getMessages().isEmpty()){
 					this.getSensorsData();
 				} else {
-					Thread.sleep(60000);
+					Thread.sleep(30000);
 				}
 				
 			} catch (Exception e) {
@@ -88,7 +95,8 @@ public class Monitor extends Thread {
      * @throws BusinessException 
      */
 	private void getSensorsData() throws BusinessException {
-						
+		LocalDateTime clockTemp = this.clock;
+		
 		try {
 			ObjectMapper objectMapper = new ObjectMapper();
 
@@ -135,9 +143,9 @@ public class Monitor extends Thread {
     	this.brokerSensors.clear();
     	this.brokerActuators.clear();		
         
-		this.analyzer.analyzeSensorsValue(this.smartRooms, (Calendar) this.clock.clone());
+		this.analyzer.analyzeSensorsValue(this.smartRooms, clockTemp);
 		
-		this.clock.add(Calendar.MINUTE, 15);
+		this.clock.plusMinutes(30);
 		
 	}
 	

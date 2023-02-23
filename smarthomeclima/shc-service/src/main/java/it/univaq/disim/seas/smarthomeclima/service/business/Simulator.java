@@ -1,5 +1,7 @@
 package it.univaq.disim.seas.smarthomeclima.service.business;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +16,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.univaq.disim.seas.smarthomeclima.broker.MqttBroker;
+import it.univaq.disim.seas.smarthomeclima.knowledgebase.business.ActuatorService;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.business.PianificationService;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.business.SmartRoomService;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.business.exception.BusinessException;
@@ -32,6 +35,9 @@ public class Simulator extends Thread {
 
 	@Autowired
 	private SmartRoomService smartRoomService;
+	
+	@Autowired
+	private ActuatorService actuatorService;
 	
 	@Autowired
 	private PianificationService pianificationService;
@@ -81,7 +87,7 @@ public class Simulator extends Thread {
 				
 				try {
 					broker.publish(
-							MessageChannel.SENSOR_CHANNEL
+						MessageChannel.SENSOR_CHANNEL
 							.replace("{srId}", String.valueOf(sm.getId()))
 							.replace("{snsId}", String.valueOf(sns.getId())), 
 							this.objectMapper.writeValueAsString(new ChannelPayload(sns.getId(), sns.getValue()))
@@ -157,7 +163,6 @@ public class Simulator extends Thread {
 					}
 					
 				} catch (JsonProcessingException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -172,10 +177,30 @@ public class Simulator extends Thread {
 							this.objectMapper.writeValueAsString(new ChannelPayload(act.getId(), act.getPower()))
 					);					
 				} catch (JsonProcessingException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
+		}
+		// subscribe to actuators channels and update power on the database
+		List<Actuator> actuators = new ArrayList<Actuator>();
+		try {
+			for (String message : this.broker.getChannelData().get(MessageChannel.ACTUATOR_CHANNEL)) {
+				ChannelPayload payload = this.objectMapper.readValue(message, ChannelPayload.class);
+				for (SmartRoom sm : this.smartRooms) {
+					for (Actuator act : sm.getActuators()) {
+						if (act.getId() == payload.getId()) {
+							act.setPower((int)payload.getValue());
+							actuators.add(act);
+						}
+					}
+				}
+			}
+			if (!actuators.isEmpty()) this.actuatorService.upsertMultipleActuators(actuators);
+			
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		} catch (IOException ex) {
+			ex.printStackTrace();
 		}
 	}
 

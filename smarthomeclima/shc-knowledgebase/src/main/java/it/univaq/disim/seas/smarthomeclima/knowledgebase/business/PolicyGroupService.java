@@ -11,5 +11,6 @@ public interface PolicyGroupService {
 	List<PolicyGroup> findAll() throws BusinessException;
 	void createPolicyGroup(PolicyGroup policyGroup) throws BusinessException;
 	void updatePolicyGroup(PolicyGroup policyGroup) throws BusinessException;
+	void upsertMultiplePolicyGroups(List<PolicyGroup> policyGroups) throws BusinessException;
 	void deletePolicyGroup(Integer id) throws BusinessException;
 }

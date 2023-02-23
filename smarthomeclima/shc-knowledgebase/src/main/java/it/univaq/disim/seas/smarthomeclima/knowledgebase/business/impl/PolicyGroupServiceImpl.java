@@ -56,6 +56,15 @@ public class PolicyGroupServiceImpl implements PolicyGroupService {
 	}
 
 	@Override
+	public void upsertMultiplePolicyGroups(List<PolicyGroup> policyGroups) throws BusinessException {
+		try {
+			this.policyGroupRepository.saveAll(policyGroups);
+		} catch (DataAccessException e) {
+            throw new BusinessException(e);
+        }
+	}
+
+	@Override
 	public void deletePolicyGroup(Integer id) throws BusinessException {
 		try {
 			this.policyGroupRepository.deleteById(id);
@@ -63,5 +72,6 @@ public class PolicyGroupServiceImpl implements PolicyGroupService {
             throw new BusinessException(e);
         }		
 	}
+
 
 }

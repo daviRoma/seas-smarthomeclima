@@ -1,9 +1,8 @@
 package it.univaq.disim.seas.smarthomeclima.analyzer;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -19,6 +18,8 @@ import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.Configurator;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.Policy;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.PolicyGroup;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.Season;
+import it.univaq.disim.seas.smarthomeclima.knowledgebase.business.PolicyGroupService;
+import it.univaq.disim.seas.smarthomeclima.knowledgebase.business.PolicyService;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.business.exception.BusinessException;
 
 import it.univaq.disim.seas.smarthomeclima.planner.Planner;
@@ -30,7 +31,17 @@ public class Analyzer {
 	@Autowired
 	private Planner planner;
 	
+	@Autowired
+	private PolicyGroupService policyGroupService;
+	
+	@Autowired
+	private PolicyService policyService;
+	
 	private Map<Integer, Configuration> actualConfigurations;
+	private LocalDateTime clock;
+	
+	private List<PolicyGroup> groups;
+	private List<Policy> policies;
 
 	/**
 	 * Analyze the values of each sensor in the smart rooms
@@ -38,16 +49,14 @@ public class Analyzer {
 	 * @param clock
 	 * @throws BusinessException 
 	 */
-	public void analyzeSensorsValue(Map<Integer, SmartRoom> smartRooms, Calendar clock) throws BusinessException {
+	public void analyzeSensorsValue(Map<Integer, SmartRoom> smartRooms, LocalDateTime clock) throws BusinessException {
 		LOGGER.info("[Analyzer]::[analyzeSensorsValue] --- Run analyzer");
+		this.clock = clock;
 		
 		Map<Integer, HashMap<SensorType, Integer>> smartRoomUpdates = new HashMap<Integer, HashMap<SensorType, Integer>>();
 		
 		// build a configuration map
 		this.setActualConfigurations(smartRooms);
-		
-		// ricavo dai dati dei sensori i codici di stato della stanza, in modo da identificarne anticipatamente 
-		// i vari problemi e facilitare il lavoro del planner 
 		
 		for (Configuration config : this.actualConfigurations.values()) {
 			for (Sensor sensor : config.getSmartRoom().getSensors()) {
@@ -57,10 +66,13 @@ public class Analyzer {
 					case TEMPERATURE:
 						
 						if (config.getPolicyGroup().getSeason().equals(Season.WINTER)) {
-							// danger case
+							// danger range
 							if (sensor.getValue() <= (config.getPolicy().getOptimalTemperature() - Policy.OPTIMAL_MARGIN - config.getPolicy().getDangerMargin())) 
 								smartRoomUpdates.get(config.getSmartRoom().getId()).put(SensorType.TEMPERATURE, Configurator.DANGER_LOW_TEMP_CODE);
-							// prediction
+							// danger priority (danger temp -1)
+							if (sensor.getValue() <= (config.getPolicy().getOptimalTemperature() - Policy.OPTIMAL_MARGIN - config.getPolicy().getDangerMargin() - 1)) 
+								smartRoomUpdates.get(config.getSmartRoom().getId()).put(SensorType.TEMPERATURE, Configurator.DANGER_PRIORITY_LOW_TEMP_CODE);
+							// predictive range
 							else if (sensor.getValue() <= (config.getPolicy().getOptimalTemperature() - Policy.OPTIMAL_MARGIN - config.getPolicy().getPredictiveMargin()))
 								smartRoomUpdates.get(config.getSmartRoom().getId()).put(SensorType.TEMPERATURE, Configurator.LOW_TEMP_CODE);
 							// optimal
@@ -68,10 +80,13 @@ public class Analyzer {
 								smartRoomUpdates.get(config.getSmartRoom().getId()).put(SensorType.TEMPERATURE, Configurator.OPT_TEMP_CODE);
 							}
 						} else {
-							// danger
+							// danger range
 							if (sensor.getValue() >= (config.getPolicy().getOptimalTemperature() + Policy.OPTIMAL_MARGIN + config.getPolicy().getDangerMargin()))
 								smartRoomUpdates.get(config.getSmartRoom().getId()).put(SensorType.TEMPERATURE, Configurator.DANGER_HIGH_TEMP_CODE);
-							// prediction
+							// danger priority (danger temp +1)
+							if (sensor.getValue() >= (config.getPolicy().getOptimalTemperature() + Policy.OPTIMAL_MARGIN + config.getPolicy().getDangerMargin() + 1))
+								smartRoomUpdates.get(config.getSmartRoom().getId()).put(SensorType.TEMPERATURE, Configurator.DANGER_HIGH_TEMP_CODE);
+							// predictive range
 							else if (sensor.getValue() >= (config.getPolicy().getOptimalTemperature() + Policy.OPTIMAL_MARGIN + config.getPolicy().getPredictiveMargin())) 
 								smartRoomUpdates.get(config.getSmartRoom().getId()).put(SensorType.TEMPERATURE, Configurator.HIGH_TEMP_CODE);
 							// optimal
@@ -104,8 +119,12 @@ public class Analyzer {
 			}
 		}
 		
+		// update current data
+		if (!this.groups.isEmpty())	this.policyGroupService.upsertMultiplePolicyGroups(this.groups);
+		if (!this.policies.isEmpty()) this.policyService.upsertMultiplePolicy(this.policies);
+		
 		// Notify the Planner
-		planner.planning(smartRoomUpdates, this.actualConfigurations, clock);
+		planner.planning(smartRoomUpdates, this.actualConfigurations, this.clock);
 	}
 
 	/**
@@ -125,17 +144,25 @@ public class Analyzer {
 			}
 			
 			for (PolicyGroup group : sm.getPolicyGroups()) {
-				if (group.getStartDate().compareTo(LocalDate.now()) <= 0 && group.getEndDate().compareTo(LocalDate.now()) > 0) {
+				if (!group.isActive() && group.getStartDate().compareTo(this.clock.toLocalDate()) <= 0 && group.getEndDate().compareTo(this.clock.toLocalDate()) > 0) {
 					group.setActive(true);
+					this.actualConfigurations.get(sm.getId()).getPolicyGroup().setActive(false);
+					
+					this.groups.add(this.actualConfigurations.get(sm.getId()).getPolicyGroup());
+					this.groups.add(group);
+					
 					this.actualConfigurations.get(sm.getId()).setPolicyGroup(group);
-					break;
 				}
 			}
 			for (Policy policy : this.actualConfigurations.get(sm.getId()).getPolicyGroup().getPolicies()) {
-				if (policy.getStartHour().getHour() <= LocalDateTime.now().getHour() && LocalDateTime.now().getHour() < policy.getEndHour().getHour()) {
+				if (!policy.isActive() && policy.getStartHour().getHour() <= this.clock.getHour() && this.clock.getHour()< policy.getEndHour().getHour()) {
 					policy.setActive(true);
+					this.actualConfigurations.get(sm.getId()).getPolicy().setActive(false);
+					
+					this.policies.add(this.actualConfigurations.get(sm.getId()).getPolicy());
+					this.policies.add(policy);
+					
 					this.actualConfigurations.get(sm.getId()).setPolicy(policy);
-					break;
 				}
 			}
 		}

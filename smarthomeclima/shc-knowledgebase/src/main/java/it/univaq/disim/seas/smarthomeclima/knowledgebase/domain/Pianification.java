@@ -1,6 +1,6 @@
 package it.univaq.disim.seas.smarthomeclima.knowledgebase.domain;
 
-import java.util.Calendar;
+import java.time.LocalDateTime;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,6 +11,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Data;
 
@@ -25,8 +26,11 @@ public class Pianification {
 	
 	private Mode mode;
 	private boolean isActive;
-	private Calendar startDate;
-	private Calendar endDate;
+	
+	@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd@HH:mm:ss")
+	private LocalDateTime startDate;
+	@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd@HH:mm:ss")
+	private LocalDateTime endDate;
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)
@@ -38,8 +42,8 @@ public class Pianification {
 	public Pianification(
 		Mode mode, 
 		boolean isActive,
-		Calendar startDate,
-		Calendar endDate, 
+		LocalDateTime startDate,
+		LocalDateTime endDate, 
 		SmartRoom smartRoom
 	) {
 		this.mode = mode;

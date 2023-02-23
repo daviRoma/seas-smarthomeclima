@@ -6,11 +6,13 @@ import java.util.HashMap;
 public final class Configurator {
  	
 	// temperature
-	public static final int DANGER_LOW_TEMP_CODE = 11;
-	public static final int DANGER_HIGH_TEMP_CODE = 12;
-	public static final int LOW_TEMP_CODE = 13;
-	public static final int HIGH_TEMP_CODE = 14;
-	public static final int OPT_TEMP_CODE = 15;
+	public static final int OPT_TEMP_CODE = 1;
+	public static final int LOW_TEMP_CODE = 2;
+	public static final int HIGH_TEMP_CODE = 3;
+	public static final int DANGER_LOW_TEMP_CODE = 4;
+	public static final int DANGER_HIGH_TEMP_CODE = 5;
+	public static final int DANGER_PRIORITY_LOW_TEMP_CODE = 6;
+	public static final int DANGER_PRIORITY_HIGH_TEMP_CODE = 7;
 
 	// states
 	public static final int OFF = 0;

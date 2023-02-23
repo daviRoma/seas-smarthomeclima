@@ -11,5 +11,6 @@ public interface ActuatorService {
 	List<Actuator> findAll() throws BusinessException;
 	void createActuator(Actuator act) throws BusinessException;
 	void updateActuator(Actuator act) throws BusinessException;
+	void upsertMultipleActuators(List<Actuator> actuators) throws BusinessException;
 	void deleteActuator(Integer id) throws BusinessException;	
 }
