@@ -11,33 +11,36 @@
 }
 
 .card-fixed {
-    width: 100%;
     height: 9.5rem;
 }
 
-.temperature-text {
-    font-size: 4.2rem;
-    font-family: sans-serif;
-    line-height: 0.90;
-    color: #1f1f1f;
-}
-
-.temperature-icon {
-    color: #ff7700;
-}
-
-.policy-group-mode {
+.card-header-title {
     font-size: 1.5rem;
     font-weight: 700;
     color: #094fa4;
 }
 
-.element-box {
-    /* height: fit-content; */
-    /* width: 51.2%; */
+.temperature-text {
+    font-size: 4.2rem;
+    font-family: sans-serif;
+    line-height: 1.3;
+    color: #1f1f1f;
+}
+
+.temperature-icon {
+    color: #ff7700;
+    line-height: 9;
 }
 
 .settings-container {
-    position: absolute;
-    top: 12rem;
+    border-top: 1px solid #dedede;
+}
+
+.chart-container {
+    height: 19rem;
+}
+
+.actions {
+    line-height: 3;
+    font-weight: 500;
 }

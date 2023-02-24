@@ -1,180 +1,201 @@
 <!-- SMART ROOM DETAIL -->
-<div class="mb-2">
+<div class="container mb-2 pb-3">
     
-    <div class="row px-3 py-3 smart-room-detail-container justify-content-md-center">
-        <!-- Temperature -->
-        <div class="col-sm-3 col-md-2 mb-2">
-            <div class="row py-4 smart-room-custom-card card-fixed">
-                <div class="col-sm-3 col-md-3 me-1 text-left temperature-icon">
-                    <i class="fa fa-thermometer-half fa-4x" aria-hidden="true"></i>
-                </div>
-                <div class="col-sm-4 col-md-4 ms-2">
-                    <div class="temperature-text">
-                        <span> {{ smartRoom.temperature ? smartRoom.temperature + '°' : '-' }}</span>
+    <!-- <div class="d-flex flex-row justify-content-center px-3 py-3 smart-room-detail-container "> -->
+    <div class="row ">
+
+        <div class="col-12">
+            <div class="row justify-content-md-center">
+                <!-- Temperature -->
+                <div class="col-2 me-4 mb-2">
+                    <div class="row py-2 smart-room-custom-card card-fixed">
+                        <div class="col-sm-12 col-md-12 py-1">
+                            <span class="card-header-title">Temperature</span>
+                        </div>
+                        <div class="col-sm-3 col-md-3 me-1 text-left temperature-icon">
+                            <i class="fa fa-thermometer-half fa-4x" aria-hidden="true"></i>
+                        </div>
+                        <div class="col-sm-4 col-md-4 ms-2">
+                            <div class="temperature-text">
+                                <span> {{ smartRoom.temperature ? smartRoom.temperature + '°' : '-' }}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        
-        <!-- Policy Group -->
-        <div class="col-sm-6 col-md-4 mb-2">
-            <div class="row pt-2 pb-1 smart-room-custom-card card-fixed">
-                <div class="col-sm-12 col-md-12 py-1">
-                    <span class="policy-group-mode">Policy Group</span>
-                </div>
-                <div class="col-sm-4 col-md-5 py-1">
-                    <span><b>Mode</b></span><br>
-                    <span class="{{ policyGroup.mode == 'ECO' ? 'text-green' : policyGroup.mode == 'COMFORT' ? 'text-blue' : 'text-grey'}}">{{ policyGroup ? policyGroup.mode : '-' }}</span>
-                </div>
-                <div class="col-sm-4 col-md-5 py-1">
-                    <span><b>Season</b></span><br>
-                    <span>{{ policyGroup ? policyGroup.season : '-'}}</span>
-                </div>
-                <div class="col-sm-4 col-md-5 py-1">
-                    <span><b>Start</b></span><br>
-                    <span>{{ policyGroup ? (policyGroup.startDate | date) : '-' }}</span>
-                </div>
-                <div class="col-sm-4 col-md-5 py-1">
-                    <span><b>End</b></span><br>
-                    <span>{{ policyGroup ? (policyGroup.endDate | date) : '-' }}</span>
-                </div>
-                <div class="col-sm-3 col-md-2 py-1 d-flex flex-column align-items-end">
-                    <button mat-icon-button class="" (click)="openEditPolicyGroup()">
-                        <mat-icon>settings</mat-icon>
-                    </button>
-                    <i class="fa fa-settings fa-2x" aria-hidden="true"></i>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Active Policy -->
-        <div class="col-sm-8 col-md-5 mb-2">
-            <div class="row py-2 smart-room-custom-card card-fixed">
-                <div class="col-sm-12 col-md-12 py-1">
-                    <span class="policy-group-mode">Active Policy</span>
-                </div>
-                <div class="col-sm-3 col-md-4 py-1">
-                    <span><b>Reactive Margin</b></span><br>
-                    <span>{{ policy ? policy.reactiveMargin : '-'}}</span>
-                </div>
-                <div class="col-sm-3 col-md-4 py-1">
-                    <span><b>Danger Margin</b></span><br>
-                    <span>{{ policy ? policy.dangerMargin : '-'}}</span>
-                </div>
-                <div class="col-sm-3 col-md-4 py-1">
-                    <span><b>Optimal Temperature</b></span><br>
-                    <span>{{ policy ? policy.optimalTemperature : '-'}}</span>
-                </div>
-                <div class="col-sm-3 col-md-4 py-1">
-                    <span><b>Start Hour</b></span><br>
-                    <span>{{ policy ? (policy.startHour | date:'shortTime') : '-'}}</span>
-                </div>
-                <div class="col-sm-3 col-md-4 py-1">
-                    <span><b>End Hour</b></span><br>
-                    <span>{{ policy ? (policy.endHour | date:'shortTime') : '-'}}</span>
-                </div>
-                <div class="col-sm col-md py-1 d-flex flex-column align-items-end">
-                    <button mat-icon-button class="" (click)="openEditPolicy()">
-                        <mat-icon>settings</mat-icon>
-                    </button>
-                    <i class="fa fa-settings fa-2x" aria-hidden="true"></i>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Sensors -->
-        <div class="col-sm-5 col-md-5 mt-3 me-3">
-            <div class="row py-2 smart-room-custom-card">
-                <div class="col-sm-12 col-md-12 py-1">
-                    <span class="policy-group-mode">Sensors</span>
-                </div>
-                <ng-container *ngFor="let sensor of smartRoom.sensors">
-                    <div class="col-sm-12 col-md-12 py-1 ">
-                        <span><b>ID:</b> {{ sensor.id }}</span><br>
-                        <span><b>Type:</b> {{ sensor.type }}</span><br>
-                        <span><b>Active: </b>
-                            <ng-container *ngIf="sensor.active; else sensorInactive">
-                                <i class="fa fa-circle" aria-hidden="true" style="color:green;"></i>
-                            </ng-container>
-                            <ng-template #sensorInactive>
-                                <i class="fa fa-circle-o" aria-hidden="true" style="color:red;"></i>
-                            </ng-template>
-                        </span>
-                    </div>
-                </ng-container>
-                <div class="col-sm col-md py-1 d-flex flex-column align-items-end">
-                    <div class="settings-container">
-                        <button mat-icon-button class="" (click)="openEditSensors()">
-                            <mat-icon>settings</mat-icon>
-                        </button>
-                        <i class="fa fa-settings fa-2x" aria-hidden="true"></i>
+                <!-- Policy Group -->
+                <div class="col-4 ms-3 me-4 mb-2">
+                    <div class="row pt-2 pb-1 smart-room-custom-card card-fixed">
+                        <div class="col-sm-12 col-md-12 py-1">
+                            <span class="card-header-title">Policy Group</span>
+                        </div>
+                        <div class="col-sm-4 col-md-5 py-1">
+                            <span><b>Mode</b></span><br>
+                            <span class="{{ policyGroup.mode == 'ECO' ? 'text-green' : policyGroup.mode == 'COMFORT' ? 'text-blue' : 'text-grey'}}">{{ policyGroup ? policyGroup.mode : '-' }}</span>
+                        </div>
+                        <div class="col-sm-4 col-md-5 py-1">
+                            <span><b>Season</b></span><br>
+                            <span>{{ policyGroup ? policyGroup.season : '-'}}</span>
+                        </div>
+                        <div class="col-sm-4 col-md-5 py-1">
+                            <span><b>Start</b></span><br>
+                            <span>{{ policyGroup ? (policyGroup.startDate | date) : '-' }}</span>
+                        </div>
+                        <div class="col-sm-4 col-md-5 py-1">
+                            <span><b>End</b></span><br>
+                            <span>{{ policyGroup ? (policyGroup.endDate | date) : '-' }}</span>
+                        </div>
+                        <div class="col-sm-3 col-md-2 py-1 d-flex flex-column align-items-end">
+                            <button mat-icon-button class="" (click)="openEditPolicyGroup()">
+                                <mat-icon>settings</mat-icon>
+                            </button>
+                            <i class="fa fa-settings fa-2x" aria-hidden="true"></i>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        
-        <!-- chart -->
-        <div class="col-sm-7 col-md-6 mt-3">
-            <div class="row py-2 smart-room-custom-card">
-                <div class="col-md-12">
-                    <canvas baseChart width="600" height="400"
-                        [type]="'line'"
-                        [data]="lineChartData"
-                        [options]="lineChartOptions"
-                        [legend]="lineChartLegend">
-                    </canvas>
-                
-                </div>
-            </div>
-        </div>
-    
-        <!-- Actuators -->
-        <div class="col-sm-5 col-md-5 mx-3">
-            <div class="row py-2 smart-room-custom-card">
-                <div class="col-sm-12 col-md-12 py-1">
-                    <span class="policy-group-mode">Actuators</span>
-                </div>
-                <ng-container *ngFor="let actuator of smartRoom.actuators">
-                    <div class="col-sm-12 col-md-12 py-1 ">
-                        <span><b>ID:</b> {{ actuator.id }}</span><br>
-                        <span><b>Type:</b> {{ actuator.type }}</span><br>
-                        <span><b>Active: </b>
-                            <ng-container *ngIf="actuator.active; else actuatorInactive">
-                                <i class="fa fa-circle" aria-hidden="true" style="color:green;"></i>
-                            </ng-container>
-                            <ng-template #actuatorInactive>
-                                <i class="fa fa-circle-o" aria-hidden="true" style="color:red;"></i>
-                            </ng-template>
-                        </span>
-                    </div>
-                </ng-container>
-                <div class="col-sm col-md px-4 d-flex flex-column align-items-end">
-                    <div class="settings-container">
-                        <button mat-icon-button class="" (click)="openEditActuators()">
-                            <mat-icon>settings</mat-icon>
-                        </button>
-                        <i class="fa fa-settings fa-2x" aria-hidden="true"></i>
+                <!-- Active Policy -->
+                <div class="col-5 ms-3 mb-2">
+                    <div class="row py-2 smart-room-custom-card card-fixed">
+                        <div class="col-sm-12 col-md-12 py-1">
+                            <span class="card-header-title">Active Policy</span>
+                        </div>
+                        <div class="col-sm-3 col-md-4 py-1">
+                            <span><b>Reactive Margin</b></span><br>
+                            <span>{{ policy ? policy.reactiveMargin : '-'}}</span>
+                        </div>
+                        <div class="col-sm-3 col-md-4 py-1">
+                            <span><b>Danger Margin</b></span><br>
+                            <span>{{ policy ? policy.dangerMargin : '-'}}</span>
+                        </div>
+                        <div class="col-sm-3 col-md-4 py-1">
+                            <span><b>Optimal Temperature</b></span><br>
+                            <span>{{ policy ? policy.optimalTemperature : '-'}}</span>
+                        </div>
+                        <div class="col-sm-3 col-md-4 py-1">
+                            <span><b>Start Hour</b></span><br>
+                            <span>{{ policy ? (policy.startHour | date:'shortTime') : '-'}}</span>
+                        </div>
+                        <div class="col-sm-3 col-md-4 py-1">
+                            <span><b>End Hour</b></span><br>
+                            <span>{{ policy ? (policy.endHour | date:'shortTime') : '-'}}</span>
+                        </div>
+                        <div class="col-sm col-md py-1 d-flex flex-column align-items-end">
+                            <button mat-icon-button class="" (click)="openEditPolicy()">
+                                <mat-icon>settings</mat-icon>
+                            </button>
+                            <i class="fa fa-settings fa-2x" aria-hidden="true"></i>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Actuator Chart -->
-        <div class="col-sm-7 col-md-6 mt-3">
-            <div class="row py-2 smart-room-custom-card">
-                <div class="col-md-12">
-                    <canvas 
-                        baseChart 
-                        width="600" 
-                        height="400" 
-                        [type]="'line'" 
-                        [data]="powerLineChartData"
-                        [options]="lineChartOptions" 
-                        [legend]="lineChartLegend">
-                    </canvas>
-        
+        <div class="col-4">
+            <div class="row justify-content-md-center">
+                <!-- Sensors -->
+                <div class="col-12 mt-3 mx-3">
+                    <div class="smart-room-custom-card px-3 pt-2 pb-1">
+                        <div class="col-sm-12 col-md-12 py-1">
+                            <span class="card-header-title">Sensors</span>
+                        </div>
+                        <ng-container *ngFor="let sensor of smartRoom.sensors">
+                            <div class="col-sm-12 col-md-12 py-1 mb-1 ">
+                                <span><b>ID:</b> {{ sensor.id }}</span><br>
+                                <span><b>Type:</b> {{ sensor.type }}</span><br>
+                                <span><b>Active: </b>
+                                    <ng-container *ngIf="sensor.active; else sensorInactive">
+                                        <i class="fa fa-circle" aria-hidden="true" style="color:green;"></i>
+                                    </ng-container>
+                                    <ng-template #sensorInactive>
+                                        <i class="fa fa-circle-o" aria-hidden="true" style="color:red;"></i>
+                                    </ng-template>
+                                </span>
+                            </div>
+                        </ng-container>
+                        <div class="d-flex col-12 py-1 settings-container">
+                            <div class="col-4 actions">
+                                Actions
+                            </div>
+                            <div class="col-8 d-flex flex-column align-items-end">
+                                <button mat-icon-button class="" (click)="openEditSensors()">
+                                    <mat-icon>settings</mat-icon>
+                                </button>
+                                <i class="fa fa-settings fa-2x" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Actuators -->
+                <div class="col-12 mt-4 mx-3">
+                    <div class="smart-room-custom-card px-3 pt-2 pb-1">
+                        <div class="col-sm-12 col-md-12 py-1">
+                            <span class="card-header-title">Actuators</span>
+                        </div>
+                        <ng-container *ngFor="let actuator of smartRoom.actuators">
+                            <div class="col-sm-12 col-md-12 py-1 mb-1">
+                                <span><b>ID:</b> {{ actuator.id }}</span><br>
+                                <span><b>Type:</b> {{ actuator.type }}</span><br>
+                                <span><b>Active: </b>
+                                    <ng-container *ngIf="actuator.active; else actuatorInactive">
+                                        <i class="fa fa-circle" aria-hidden="true" style="color:green;"></i>
+                                    </ng-container>
+                                    <ng-template #actuatorInactive>
+                                        <i class="fa fa-circle-o" aria-hidden="true" style="color:red;"></i>
+                                    </ng-template>
+                                </span>
+                            </div>
+                        </ng-container>
+                        <div class="d-flex col-12 py-1 settings-container">
+                            <div class="col-4 actions">
+                                Actions
+                            </div>
+                            <div class="col-8 d-flex flex-column align-items-end">
+                                <button mat-icon-button class="" (click)="openEditActuators()">
+                                    <mat-icon>settings</mat-icon>
+                                </button>
+                                <i class="fa fa-settings fa-2x" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        </div>
+
+        <div class="col-8">
+            <!-- Sensor chart -->
+            <div class="col-12 ms-0 mt-3">
+                <div class="smart-room-custom-card px-3 py-2">
+                    <div class="chart-container">
+                        <canvas 
+                            baseChart 
+                            width="1050" 
+                            height="400"
+                            [type]="'line'"
+                            [data]="lineChartData"
+                            [options]="lineChartOptions"
+                            [legend]="lineChartLegend">
+                        </canvas>
+                    
+                    </div>
                 </div>
             </div>
+            <!-- Actuator Chart -->
+            <div class="col-12 ms-0 mt-4">
+                <div class="smart-room-custom-card px-3 py-2" >
+                    <div class="chart-container">
+                        <canvas 
+                            baseChart 
+                            width="1050" 
+                            height="400" 
+                            [type]="'line'" 
+                            [data]="powerLineChartData"
+                            [options]="lineChartOptions" 
+                            [legend]="lineChartLegend">
+                        </canvas>
+            
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
