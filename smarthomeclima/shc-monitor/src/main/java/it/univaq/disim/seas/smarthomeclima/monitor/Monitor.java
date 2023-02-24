@@ -2,7 +2,6 @@ package it.univaq.disim.seas.smarthomeclima.monitor;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +30,7 @@ public class Monitor extends Thread {
 
 	@Autowired
 	private Analyzer analyzer;
-
+ 
 	@Autowired
 	private SmartRoomService smartRoomService;
 	
@@ -40,9 +39,10 @@ public class Monitor extends Thread {
 	@Autowired
     private MqttBroker brokerActuators;
     
+	private boolean isStarted = true;
     private LocalDateTime clock;
-    private Map<Integer, SmartRoom> smartRooms = new HashMap<Integer, SmartRoom>();
     
+    private Map<Integer, SmartRoom> smartRooms = new HashMap<Integer, SmartRoom>();
     
     public Monitor() {
     	// inizialize the clock
@@ -50,8 +50,8 @@ public class Monitor extends Thread {
     }
     
     // testing purpose
-    public void setClock() {
-    	this.clock = LocalDateTime.of(2023, 1, 1, 1, 0);
+    public void setClock(LocalDateTime clock) {
+    	this.clock = clock;
     }
     
     /**
@@ -75,7 +75,7 @@ public class Monitor extends Thread {
     	this.brokerSensors.subscribe(MessageChannel.SENSOR_CHANNEL);
     	this.brokerActuators.subscribe(MessageChannel.ACTUATOR_CHANNEL);
 
-        while (true) {
+        while (this.isStarted) {
         	LOGGER.info("[Monitor]::[run] --- Clock: " + this.clock.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 			try {
 				if (!this.brokerSensors.getMessages().isEmpty()){
@@ -84,10 +84,23 @@ public class Monitor extends Thread {
 					Thread.sleep(30000);
 				}
 				
-			} catch (Exception e) {
+			} catch (InterruptedException e) {
+		        Thread.currentThread().interrupt();  //set the flag back to true
+		        this.isStarted = false;
+		    } catch (Exception e) {
 				e.printStackTrace();
-			}
+				this.isStarted = false;
+			} 
         }
+	}
+    
+	public void terminate() throws InterruptedException {
+		this.isStarted = false;
+		this.join();
+		Thread.currentThread().interrupt();
+	    if (Thread.interrupted()) {
+	    	LOGGER.info("[Monitor]::[stopped]");
+	    }
 	}
     
     /**

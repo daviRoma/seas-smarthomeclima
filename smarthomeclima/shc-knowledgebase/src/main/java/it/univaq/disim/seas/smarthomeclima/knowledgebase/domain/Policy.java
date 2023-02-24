@@ -26,7 +26,7 @@ public class Policy {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 	
-	private double predictiveMargin;
+	private double reactiveMargin;
 	private double dangerMargin;
 	private double optimalTemperature;
 	

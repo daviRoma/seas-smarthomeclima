@@ -19,6 +19,7 @@ import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.Actuator;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.PolicyGroup;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.Sensor;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.SmartRoom;
+import it.univaq.disim.seas.smarthomeclima.service.helpers.SmartRoomHelper;
 
 @Controller
 @RequestMapping("/smartrooms")
@@ -30,7 +31,7 @@ public class SmartRoomController {
 	@GetMapping
 	@ResponseBody
 	public List<SmartRoom> getAllSmartRooms() throws BusinessException {
-		return this.service.findAll();
+		return SmartRoomHelper.setSmartRoomPolicies(this.service.findAll());
 	}
 	
 	@GetMapping("/{id}")

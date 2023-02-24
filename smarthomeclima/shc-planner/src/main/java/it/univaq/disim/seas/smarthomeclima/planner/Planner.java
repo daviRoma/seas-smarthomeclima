@@ -95,7 +95,7 @@ public class Planner {
 				LocalDateTime targetPianificationTime = clock;
 
 				
-				// Predictive case
+				// Reactive case
 				if (motion == 1 || temperatureCode == Configurator.LOW_TEMP_CODE || temperatureCode == Configurator.HIGH_TEMP_CODE) {
 					if (actualConfigurations.get(entry.getKey()).getPolicyGroup().getSeason().equals(Season.WINTER)) {
 						// Get all actuator of type RADIATOR

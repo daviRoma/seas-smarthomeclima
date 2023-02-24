@@ -1,5 +1,6 @@
 package it.univaq.disim.seas.smarthomeclima.service.presentation;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,6 +33,7 @@ public class MonitoringController {
 		LOGGER.info("[MonitoringController]::[startMonitoring] --- Starting monitoring");;
 		
 		this.simulator.start();
+//		this.monitor.setClock(LocalDateTime.of(2023, 2, 1, 1, 0));
 		this.monitor.start();
 		
 		return new HashMap<String, String>(){{ put("Message", "OK");}};
@@ -40,9 +42,15 @@ public class MonitoringController {
 	@GetMapping("/stop")
 	@ResponseBody
 	public Map<String, String> stopMonitoring() {
-		LOGGER.info("[MonitoringController]::[stopMonitoring] --- Stop monitoring");;
-		this.simulator.terminate();
-		this.monitor.interrupt();
+		LOGGER.info("[MonitoringController]::[stopMonitoring] --- Stop monitoring");
+		try {
+			this.simulator.terminate();
+			this.monitor.terminate();
+			
+		} catch (InterruptedException ex) {
+			ex.printStackTrace();
+		}
+
 		return new HashMap<String, String>(){{ put("Message", "Stopped");}};
 	}
 }

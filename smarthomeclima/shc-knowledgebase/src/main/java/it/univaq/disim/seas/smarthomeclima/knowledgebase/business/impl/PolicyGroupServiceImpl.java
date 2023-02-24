@@ -1,6 +1,9 @@
 package it.univaq.disim.seas.smarthomeclima.knowledgebase.business.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -11,6 +14,7 @@ import it.univaq.disim.seas.smarthomeclima.knowledgebase.business.PolicyGroupSer
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.business.exception.BusinessException;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.business.repositories.PolicyGroupRepository;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.PolicyGroup;
+import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.SmartRoom;
 
 @Service
 @Transactional
@@ -32,6 +36,26 @@ public class PolicyGroupServiceImpl implements PolicyGroupService {
 	public List<PolicyGroup> findAll() throws BusinessException {
 		try {
 			return this.policyGroupRepository.findAll();
+		} catch (DataAccessException e) {
+            throw new BusinessException(e);
+        }
+	}
+	
+	@Override
+	public Map<Integer, List<PolicyGroup>> findAllBySmartRooms(List<SmartRoom> smartRooms) throws BusinessException {
+		Map<Integer, List<PolicyGroup>> response = new HashMap<Integer, List<PolicyGroup>>();
+		List<PolicyGroup> queryResult = this.policyGroupRepository.findBySmartRoomList(smartRooms);
+		
+		try {
+			if (queryResult.isEmpty()) return null;
+			for (PolicyGroup group : queryResult) {
+				if (response.containsKey(group.getSmartRoom().getId())) {
+					response.get(group.getSmartRoom().getId()).add(group);
+				} else {
+					response.put(group.getSmartRoom().getId(), new ArrayList<PolicyGroup>() {{ add(group); }});
+				}
+			}
+			return response;
 		} catch (DataAccessException e) {
             throw new BusinessException(e);
         }
@@ -72,6 +96,5 @@ public class PolicyGroupServiceImpl implements PolicyGroupService {
             throw new BusinessException(e);
         }		
 	}
-
 
 }

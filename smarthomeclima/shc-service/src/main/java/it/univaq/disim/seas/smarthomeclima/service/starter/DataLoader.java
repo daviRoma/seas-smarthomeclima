@@ -170,7 +170,7 @@ public class DataLoader implements CommandLineRunner {
 				case 5:
 				case 6:
 					policy.setDangerMargin(2);
-					policy.setPredictiveMargin(1);
+					policy.setReactiveMargin(1);
 					policy.setOptimalTemperature(winter ? temp - 2 : temp + 2);
 					break;
 				case 7:
@@ -181,7 +181,7 @@ public class DataLoader implements CommandLineRunner {
 				case 19:
 				case 20:
 					policy.setDangerMargin(3);
-					policy.setPredictiveMargin(1);
+					policy.setReactiveMargin(1);
 					policy.setOptimalTemperature(temp);
 					break;
 				case 11:
@@ -191,20 +191,20 @@ public class DataLoader implements CommandLineRunner {
 				case 23:
 				case 24:
 					policy.setDangerMargin(3);
-					policy.setPredictiveMargin(1);
+					policy.setReactiveMargin(1);
 					policy.setOptimalTemperature(winter ? temp - 1 : temp + 1);
 					break;
 				case 12:
 				case 13:
 				case 14:
 					policy.setDangerMargin(3);
-					policy.setPredictiveMargin(1);
+					policy.setReactiveMargin(1);
 					policy.setOptimalTemperature(winter ? temp - 2 : temp + 2);
 					break;
 				case 21:
 				case 22:
 					policy.setDangerMargin(2.5);
-					policy.setPredictiveMargin(1);
+					policy.setReactiveMargin(1);
 					policy.setOptimalTemperature(winter ? temp + 0.5 : temp + 0.5);
 					break;
 				default:

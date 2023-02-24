@@ -46,7 +46,7 @@ public class Simulator extends Thread {
 	private MqttBroker broker;
 	
 	private List<SmartRoom> smartRooms;
-	private boolean isStart = false;
+	private boolean isStarted = false;
 	
 	private ObjectMapper objectMapper = new ObjectMapper();
 	
@@ -57,7 +57,7 @@ public class Simulator extends Thread {
 		LOGGER.info("[Simulator]::[run] --- Simulator started");
 
 		try {
-			this.isStart = true;
+			this.isStarted = true;
 			this.smartRooms = this.smartRoomService.findAll();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -100,16 +100,17 @@ public class Simulator extends Thread {
 			
 		}
 		
-		while(this.isStart) {
+		while(this.isStarted) {
 			try {
 				this.simulation();				
 				Thread.sleep(60000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
-				this.isStart = false;
+			    Thread.currentThread().interrupt();  //set the flag back to true
+				this.isStarted = false;
 			} catch (BusinessException e) {
 				e.printStackTrace();
-				this.isStart = false;
+				this.isStarted = false;
 			}
 		}
 	}
@@ -204,7 +205,12 @@ public class Simulator extends Thread {
 		}
 	}
 
-	public void terminate() {
-		this.isStart = false;
+	public void terminate() throws InterruptedException {
+		this.isStarted = false;
+		this.join();
+		Thread.currentThread().interrupt();
+	    if (Thread.interrupted()) {
+	    	LOGGER.info("[Simulator]::[stopped]");
+	    }
 	}
 }

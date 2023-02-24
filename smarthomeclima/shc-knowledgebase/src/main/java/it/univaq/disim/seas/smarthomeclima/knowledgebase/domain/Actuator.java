@@ -21,9 +21,9 @@ public class Actuator {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 	
-	private int power;
 	private String name;
 	private ActuatorType type;
+	private int power;
 	private boolean isActive;
 	
 	@ManyToOne
