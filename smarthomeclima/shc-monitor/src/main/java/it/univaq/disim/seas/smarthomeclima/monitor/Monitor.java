@@ -44,7 +44,7 @@ public class Monitor extends Thread {
     
     private Map<Integer, SmartRoom> smartRooms = new HashMap<Integer, SmartRoom>();
     
-    public Monitor() {
+    public Monitor() { 
     	// inizialize the clock
     	this.clock = LocalDateTime.now();
     }

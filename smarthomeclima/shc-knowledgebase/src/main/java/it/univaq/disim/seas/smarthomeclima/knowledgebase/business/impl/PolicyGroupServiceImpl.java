@@ -44,7 +44,7 @@ public class PolicyGroupServiceImpl implements PolicyGroupService {
 	@Override
 	public Map<Integer, List<PolicyGroup>> findAllBySmartRooms(List<SmartRoom> smartRooms) throws BusinessException {
 		Map<Integer, List<PolicyGroup>> response = new HashMap<Integer, List<PolicyGroup>>();
-		List<PolicyGroup> queryResult = this.policyGroupRepository.findBySmartRoomList(smartRooms);
+		List<PolicyGroup> queryResult = this.policyGroupRepository.findAllBySmartRoom(smartRooms);
 		
 		try {
 			if (queryResult.isEmpty()) return null;
