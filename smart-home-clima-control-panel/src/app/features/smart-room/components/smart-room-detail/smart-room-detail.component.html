@@ -16,8 +16,14 @@
                             <i class="fa fa-thermometer-half fa-4x" aria-hidden="true"></i>
                         </div>
                         <div class="col-sm-4 col-md-4 ms-2">
-                            <div class="temperature-text">
-                                <span> {{ smartRoom.temperature ? smartRoom.temperature + '°' : '-' }}</span>
+                            <div class="temperature-text-container">
+                                <span class="temperature-text {{
+                                smartRoom.temperature && (
+                                    smartRoom.temperature <= 15 ? 'text-blue' : 
+                                    (smartRoom.temperature > 15 && smartRoom.temperature < 18) ? 'text-yellow' : 
+                                    (smartRoom.temperature >= 18 && smartRoom.temperature < 22) ? 'text-orange' : 
+                                    'text-red'
+                                )}}"> {{ smartRoom.temperature ? smartRoom.temperature + '°' : '-' }}</span>
                             </div>
                         </div>
                     </div>
@@ -30,11 +36,11 @@
                         </div>
                         <div class="col-sm-4 col-md-5 py-1">
                             <span><b>Mode</b></span><br>
-                            <span class="{{ policyGroup.mode == 'ECO' ? 'text-green' : policyGroup.mode == 'COMFORT' ? 'text-blue' : 'text-grey'}}">{{ policyGroup ? policyGroup.mode : '-' }}</span>
+                            <span class="policy-group mode {{ policyGroup.mode == 'ECO' ? 'text-green' : policyGroup.mode == 'COMFORT' ? 'text-blue' : 'text-red'}}">{{ policyGroup ? policyGroup.mode : '-' }}</span>
                         </div>
                         <div class="col-sm-4 col-md-5 py-1">
                             <span><b>Season</b></span><br>
-                            <span>{{ policyGroup ? policyGroup.season : '-'}}</span>
+                            <span class="policy-group seasons {{ policyGroup.season == 'WINTER' ? 'text-blue' : 'text-orange'}}">{{ policyGroup ? policyGroup.season : '-'}}</span>
                         </div>
                         <div class="col-sm-4 col-md-5 py-1">
                             <span><b>Start</b></span><br>

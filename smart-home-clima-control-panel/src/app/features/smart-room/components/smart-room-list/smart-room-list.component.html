@@ -17,7 +17,7 @@
                                     <span class="temperature-text {{
                                         smartRoom.temperature && (
                                             smartRoom.temperature <= 15 ? 'text-blue' : 
-                                            (smartRoom.temperature > 15 && smartRoom.temperature < 18) ? 'text-green' : 
+                                            (smartRoom.temperature > 15 && smartRoom.temperature < 18) ? 'text-yellow' : 
                                             (smartRoom.temperature >= 18 && smartRoom.temperature < 22) ? 'text-orange' : 
                                             'text-red'
                                         )}}">{{smartRoom.temperature ? smartRoom.temperature + '°' : '-'}}</span>
@@ -26,46 +26,52 @@
                         </mat-card-header>
 
                         <mat-card-content>
-                            <div class="row py-2">
-                                <div class="col-sm">
+                            <div class="row py-1">
+                                <div class="col-sm pt-2 pb-1">
                                     <div class="row">
-                                        <div class="col-sm-12 mb-1">
-                                            <span>Sensors: {{ smartRoom.sensors?.length }}</span>
+                                        <div class="col-sm-12 mb-1 card-container-title">
+                                            <span>Sensors: {{ smartRoom.sensors.length }}</span>
                                         </div>
-                                        <div class="col-sm-12">
-                                            <mat-list>
-                                                <ng-container *ngFor="let sensor of smartRoom.sensors">
-                                                    <mat-list-item class="{{ sensor.active ? 'sensor-active' : 'sensor-inactive'}}">{{ sensor.id }}, {{ sensor.type }}</mat-list-item>
-                                                    <mat-divider></mat-divider>
+                                        <ng-container *ngFor="let sensor of smartRoom.sensors">
+                                            <div class="col-sm-12 py-1">
+                                                <ng-container *ngIf="sensor.active; else sensorInactive">
+                                                    <i class="fa fa-circle" aria-hidden="true" style="color:green;"></i>
                                                 </ng-container>
-                                            </mat-list>
-                                        </div>
+                                                <ng-template #sensorInactive>
+                                                    <i class="fa fa-circle-o" aria-hidden="true" style="color:red;"></i>
+                                                </ng-template>
+                                                <span class="ms-2">{{ sensor.type }}</span>
+                                            </div>
+                                        </ng-container>
                                     </div>
                                 </div>
-                                <div class="col-sm">
+                                <div class="col-sm pt-2 pb-1">
                                     <div class="row">
-                                        <div class="col-sm-12 mb-1">
-                                            <span>Actuators: {{ smartRoom.actuators?.length }}</span>
+                                        <div class="col-sm-12 mb-1 card-container-title">
+                                            <span>Actuators: {{ smartRoom.actuators.length }}</span>
                                         </div>
-                                        <div class="col-sm-12">
-                                            <mat-list>
-                                                <ng-container *ngFor="let actuator of smartRoom.actuators">
-                                                    <mat-list-item class="{{ actuator.active ? 'sensor-active' : 'sensor-inactive'}}">{{ actuator.id }}, {{ actuator.type }}</mat-list-item>
-                                                    <mat-divider></mat-divider>
+                                       <ng-container *ngFor="let actuator of smartRoom.actuators">
+                                            <div class="col-sm-12 py-1">
+                                                <ng-container *ngIf="actuator.active; else actuatorInactive">
+                                                    <i class="fa fa-circle" aria-hidden="true" style="color:green;"></i>
                                                 </ng-container>
-                                            </mat-list>
-                                        </div>
+                                                <ng-template #actuatorInactive>
+                                                    <i class="fa fa-circle-o" aria-hidden="true" style="color:red;"></i>
+                                                </ng-template>
+                                                <span class="ms-2">{{ actuator.type }}</span>
+                                            </div>
+                                        </ng-container>
                                     </div>
                                 </div>
                             </div>
 
                         </mat-card-content>
-                        <mat-card-actions>
-                                <div class="col-sm-12 col-md-12 d-flex flex-column align-items-end">
-                                    <a [routerLink]="['/smart-room/detail', smartRoom.id]" title="Go to smart room">
-                                        <button mat-raised-button color="primary">Go</button>
-                                    </a>
-                                </div>
+                        <mat-card-actions class="card-actions">
+                            <div class="col-sm-12 col-md-12 d-flex flex-column align-items-end">
+                                <a [routerLink]="['/smart-room/detail', smartRoom.id]" title="Go to smart room">
+                                    <button mat-raised-button color="primary">Go</button>
+                                </a>
+                            </div>
                         </mat-card-actions>
                     </mat-card>
                 </div>

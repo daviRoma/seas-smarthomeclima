@@ -3,7 +3,7 @@ import { SmartRoom } from 'src/app/models/smart-room.model';
 export class Sensor {
     id!: number;
     type!: string;
-    isActive!: boolean;
+    active!: boolean;
     values!: number[];
     smartRoom!: SmartRoom;
 }

@@ -30,19 +30,18 @@ import { SmartRoomDialogConf, DeleteDialogConf } from 'src/app/config/dialog.con
 export class DetailComponent implements OnInit, OnDestroy {
 
   public smartRoom: SmartRoom;
-  public monitor: Monitor;
-
-  public params: any;
 
   public isLoading: boolean;
-  public isStart: boolean;
-
+  
   public temperatureValues: number[];
   public motionValues: number[];
   public powerValues: number[];
   
   public editSmartRoomDialogRef: any;
   public deleteSmartRoomDialogRef: any;
+  
+  private isStarted: boolean;
+  private params: any;
 
   private routeParamsSubscription: Subscription;
   private destroy: Subject<boolean> = new Subject<boolean>();
@@ -55,7 +54,7 @@ export class DetailComponent implements OnInit, OnDestroy {
     private store: Store<AppState>
   ) {
     this.isLoading = true;
-    this.isStart = true;
+    this.isStarted = true;
 
     this.temperatureValues = [];
     this.motionValues = [];
@@ -65,29 +64,20 @@ export class DetailComponent implements OnInit, OnDestroy {
     this.deleteSmartRoomDialogRef = { ...DeleteDialogConf };
 
     this.smartRoom = new SmartRoom();
-    this.monitor = new Monitor();
 
     this.routeParamsSubscription = this.route.params.subscribe((params) => {
       if (params['smartroom_id']) {
         this.params = { smartRoomId: parseInt(params['smartroom_id'])};
         // Select smartRoom from store by url parameter
-        if (this.isStart) {
-          this.loadSmartRoomData();
-          this.isStart = false;
+        if (this.isStarted) {
+          this.loadWithSelectors();
+          this.isStarted = false;
         }
       }
     });
   }
 
   ngOnInit(): void {
-    this.store
-      .select(smartRoomSelectors.selectSmartRoomLoading)
-      .pipe(takeUntil(this.destroy))
-      .subscribe((loading) => {
-        if (!loading) {
-          this.loadWithSelectors();
-        }
-      });
   }
 
   ngOnDestroy(): void {
@@ -134,15 +124,14 @@ export class DetailComponent implements OnInit, OnDestroy {
   }
 
   private loadWithSelectors(): void {
-    const selectSmartRoom = smartRoomSelectors.selectEntitiesById(this.params.smartRoomId);
     this.store
-      .select(selectSmartRoom)
+      .select(smartRoomSelectors.selectEntitiesById(this.params.smartRoomId))
       .pipe(takeUntil(this.destroy))
-      .subscribe((smartRoom: SmartRoom | undefined) => {
-        console.log('[SmartRoom]', smartRoom);
+      .subscribe((result: SmartRoom | undefined) => {
+        console.log('[Detail]::[loadWithSelectors]', result);
 
-        if (smartRoom) {
-          this.smartRoom = { ...smartRoom };
+        if (result) {
+          this.smartRoom = { ...result };
           let temperatureSensor = this.smartRoom.sensors?.find(el => el.type == 'TEMPERATURE');
           let motionSensor = this.smartRoom.sensors?.find(el => el.type == 'MOTION');
           let powerActuator = this.smartRoom.actuators?.find(el => el.power);
@@ -150,30 +139,12 @@ export class DetailComponent implements OnInit, OnDestroy {
           this.temperatureValues = temperatureSensor?.values ? [...temperatureSensor.values] : [];
           this.motionValues = motionSensor?.values ? [...motionSensor.values] : [];
           this.powerValues = powerActuator?.values ? [...powerActuator.values] : [];
-          this.loadMonitorData();
+          // this.loadMonitorData();
+          this.isLoading = false;
+        } else {
+          this.store.dispatch(SmartRoomLoadOneAction({ id: this.params.smartRoomId, dispatch: true } as SmartRoomRequest));
         }
-        this.isLoading = false;
     });
-  }
-
-  private loadSmartRoomData(): void {
-    this.store.dispatch(SmartRoomLoadOneAction({ id: this.params.smartRoomId, dispatch: true } as SmartRoomRequest));
-  }
-
-  private loadMonitorData(): void {
-    const selectMonitor = monitorSelector.selectEntitiesById(1);
-    this.subscription.add(
-      this.store
-      .select(selectMonitor)
-      .pipe(takeUntil(this.destroy))
-      .subscribe((result: Monitor | undefined) => {
-        console.log('[Detail]::[Monitor]', result);
-
-        if (result) {
-          this.monitor = { ...result } as Monitor;
-        }
-      })
-    );
   }
 
 }

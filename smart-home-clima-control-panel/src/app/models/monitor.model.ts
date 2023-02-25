@@ -5,11 +5,17 @@
 export class Monitor {
     id: number = 1;
     isStarted: boolean = false;
-    channels: Channel[] = [];
+    channels!: Channel[];
 }
 
 export class Channel {
     topic!: string;
     deviceId!: number;
-    messages!: any[];
+    messages!: PayloadMessage[];
+}
+
+export class PayloadMessage {
+    id!: number;
+    value!: number;
+    createdDate!: string;
 }

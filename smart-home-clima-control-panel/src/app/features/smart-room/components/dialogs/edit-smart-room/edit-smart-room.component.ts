@@ -55,7 +55,7 @@ export class EditSmartRoomComponent {
 
     this.dialogConfig.operation === 'new' ?
       this.store.dispatch(SmartRoomNewAction({payload})) :
-      this.store.dispatch(SmartRoomUpdateAction({ ...payload, id: this.smartRoom.id }));
+      this.store.dispatch(SmartRoomUpdateAction({payload: { ...payload, id: this.smartRoom.id }}));
   }
 
   closeDialog(): void {

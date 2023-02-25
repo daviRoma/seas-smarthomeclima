@@ -24,9 +24,9 @@ export class SmartRoomListComponent implements OnInit, OnDestroy {
   public isLoading: boolean;
   public smartRoomTotal: number;
 
-  public error$: Observable<boolean> | undefined;
+  public error$: Observable<Boolean> | undefined;
 
-  private destroy: Subject<boolean> = new Subject<boolean>();
+  private destroy: Subject<Boolean> = new Subject<Boolean>();
 
   constructor(
     public newSmartRoomDialog: MatDialog,
@@ -40,23 +40,7 @@ export class SmartRoomListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.store.dispatch(SmartRoomLoadAction());
-
-    this.subscription.add(
-      this.store
-        .select(smartRoomSelectors.selectSmartRoomLoading)
-        .pipe(takeUntil(this.destroy))
-        .subscribe((loading) => {
-          if (loading) {
-            this.smartRooms = [];
-          } else {
-            this.selectSmartRooms();
-          }
-          this.isLoading = loading;
-        })
-    );
-
-    this.error$ = this.store.pipe(select(smartRoomSelectors.selectSmartRoomError));
+    this.selectSmartRooms();
   }
   
   public openNewSmartRoomModal(): void {
@@ -84,6 +68,8 @@ export class SmartRoomListComponent implements OnInit, OnDestroy {
       .subscribe((response: SmartRoom[]) => {
         if (response.length) {
           this.smartRooms = response;
+        } else {
+          this.getSmartRooms();
         }
       });
 
@@ -93,6 +79,31 @@ export class SmartRoomListComponent implements OnInit, OnDestroy {
       .subscribe((total) => (this.smartRoomTotal = total));
   }
 
-  ngOnDestroy(): void {}
+  private getSmartRooms(): void {
+    this.store.dispatch(SmartRoomLoadAction());
+
+    this.subscription.add(
+      this.store
+        .select(smartRoomSelectors.selectSmartRoomLoading)
+        .pipe(takeUntil(this.destroy))
+        .subscribe((loading) => {
+          if (loading) {
+            this.smartRooms = [];
+          } else {
+            this.selectSmartRooms();
+          }
+          this.isLoading = loading;
+        })
+    );
+
+    this.error$ = this.store.pipe(select(smartRoomSelectors.selectSmartRoomError));
+  }
+
+  ngOnDestroy(): void {
+    this.store.complete();
+    this.destroy.next(true);
+    this.destroy.unsubscribe();
+    if (this.subscription) this.subscription.unsubscribe();    
+  }
 
 }

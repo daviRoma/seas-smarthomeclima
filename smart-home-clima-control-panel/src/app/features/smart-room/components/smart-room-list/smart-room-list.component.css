@@ -3,18 +3,11 @@
     font-size: 1.75rem;
 }
 
-.temperature-text.text-red {
-    color: #e02828;
+.card-container-title {
+    border-bottom: 1px solid #dedede;
+    font-weight: 500;
 }
 
-.temperature-text.text-orange {
-    color: #e37640;
-}
-
-.temperature-text.text-green {
-    color: #d1e028;
-}
-
-.temperature-text.text-blue {
-    color: #2841e0;
+.card-actions {
+    border-top: 1px solid #dedede;
 }

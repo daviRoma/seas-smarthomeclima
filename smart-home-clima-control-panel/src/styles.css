@@ -92,6 +92,10 @@ a {
     color: #ce2a2a;
 }
 
+.text-orange {
+    color: #d16c19;
+}
+
 .text-green {
     color: #2f9f45;
 }
@@ -101,7 +105,23 @@ a {
 }
 
 .text-blue {
-    color: #112979;
+    color: #114279;
+}
+
+.temperature-text.text-red {
+    color: #d82d2d;
+}
+
+.temperature-text.text-orange {
+    color: #e4743b;
+}
+
+.temperature-text.text-yellow {
+    color: #c4bf2a;
+}
+
+.temperature-text.text-blue {
+    color: #2841e0;
 }
 
 /* DIALOG */
