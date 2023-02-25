@@ -149,7 +149,7 @@ export class DetailComponent implements OnInit, OnDestroy {
 
           this.temperatureValues = temperatureSensor?.values ? [...temperatureSensor.values] : [];
           this.motionValues = motionSensor?.values ? [...motionSensor.values] : [];
-          this.powerValues = powerActuator?.power ? [...powerActuator.power] : [];
+          this.powerValues = powerActuator?.values ? [...powerActuator.values] : [];
           this.loadMonitorData();
         }
         this.isLoading = false;

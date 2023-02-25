@@ -10,5 +10,6 @@ export class Monitor {
 
 export class Channel {
     topic!: string;
+    deviceId!: number;
     messages!: any[];
 }

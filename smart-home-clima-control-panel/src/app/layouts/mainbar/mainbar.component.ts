@@ -28,10 +28,10 @@ export class MainbarComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const selectControlPanel = monitorSelector.selectEntitiesById(1);
+    const selectMonitor = monitorSelector.selectEntitiesById(1);
     this.subscription.add(
       this.store
-      .select(selectControlPanel)
+      .select(selectMonitor)
       .pipe(takeUntil(this.destroy))
       .subscribe((result: Monitor | undefined) => {
         console.log('[Mainbar]::[Monitor]', result);

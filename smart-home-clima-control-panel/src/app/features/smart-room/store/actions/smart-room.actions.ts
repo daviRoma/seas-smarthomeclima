@@ -73,7 +73,7 @@ export const SmartRoomNewFailureAction = createAction(
 
 export const SmartRoomUpdateAction = createAction(
   SmartRoomActionTypes.UPDATE,
-  props<SmartRoom>()
+  props<{payload: SmartRoom}>()
 );
 
 export const SmartRoomUpdateFailureAction = createAction(
@@ -83,7 +83,7 @@ export const SmartRoomUpdateFailureAction = createAction(
 
 export const SmartRoomUpdateManuallyAction = createAction(
   SmartRoomActionTypes.UPDATE_MANUALLY,
-  props<{payload: SmartRoom}>()
+  props<{payload: SmartRoom[]}>()
 );
 
 export const SmartRoomUpdateManyManuallyAction = createAction(

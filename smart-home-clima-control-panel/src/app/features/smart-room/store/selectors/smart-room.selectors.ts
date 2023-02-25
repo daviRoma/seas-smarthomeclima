@@ -45,11 +45,6 @@ export const selectEntity = (elementId: number) => createSelector(
   (entities: any[]) => entities.find((elem: any) => elem.id == elementId)
 );
 
-// export const selectEntitiesByID = (elementId: number) => createSelector(
-//   selectAllSmartRoom,
-//   (entities: any[]) => entities.find((elem: any) => elem.id == elementId)
-// );
-
 export const selectEntitiesById = (id: number) => createSelector(
   selectAllSmartRoom, 
   (allSmartRooms) => allSmartRooms.find(elem => elem.id === id));

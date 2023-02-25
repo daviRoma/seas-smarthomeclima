@@ -39,10 +39,12 @@ export const smartRoomReducer = createReducer(
   on(SmartRoomActions.SmartRoomUpdateFailureAction, state => ( { ...state, loading: false, error: true, total: state.total })),
   on(SmartRoomActions.SmartRoomUpdateManuallyAction, 
     (state, action) => (
-      state.total ? smartRoomAdapter.updateOne(
-        { id: action.payload.id, changes: action.payload },
-        { ...state, loading: false, error: false, total: state.total }
-      ) : smartRoomAdapter.setOne(action.payload, { ...state, loading: false, error: false, total: 1 })
+      smartRoomAdapter.setAll( action.payload, {
+        ...state,
+        error: false,
+        loading: false,
+        total: action.payload ? action.payload.length : 0
+      })
     )
   ),
   on(SmartRoomActions.SmartRoomDeleteAction, state => ( { ...state, loading: true })),

@@ -9,11 +9,11 @@ import { PolicyGroup } from './policy-group.model';
 export class SmartRoom {
   id!: number;
   number?: number;
-  type?: string;
+  type!: string;
   temperature?: number;
   policyGroups?: PolicyGroup[];
-  sensors?: Sensor[];
-  actuators?: Actuator[];
+  sensors!: Sensor[];
+  actuators!: Actuator[];
 }
 
 export class SmartRoomRequest {
