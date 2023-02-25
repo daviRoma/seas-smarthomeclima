@@ -1,7 +1,6 @@
 package it.univaq.disim.seas.smarthomeclima.analyzer;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +36,7 @@ public class Analyzer {
 	private Map<Integer, Configuration> actualConfigurations;
 	private LocalDateTime clock;
 	
-	private Map<Integer, List<PolicyGroup>> groups;
+	private Map<Integer, List<PolicyGroup>> policyGroups;
 
 	/**
 	 * Analyze the values of each sensor in the smart rooms
@@ -51,16 +50,18 @@ public class Analyzer {
 		
 		Map<Integer, HashMap<SensorType, Integer>> smartRoomUpdates = new HashMap<Integer, HashMap<SensorType, Integer>>();
 		
-		this.groups = this.policyGroupService.findAllBySmartRooms( new ArrayList<SmartRoom>(smartRooms.values()));
+		// Get policies
+		this.policyGroups = this.policyGroupService.findAllBySmartRooms();
 		
 		// build a configuration map
 		this.setActualConfigurations(smartRooms);
 		
-		for (Configuration config : this.actualConfigurations.values()) {
-			for (Sensor sensor : config.getSmartRoom().getSensors()) {
-				
-				switch (sensor.getType()) {
-				
+		try {
+			for (Configuration config : this.actualConfigurations.values()) {
+				for (Sensor sensor : config.getSmartRoom().getSensors()) {
+					
+					switch (sensor.getType()) {
+					
 					case TEMPERATURE:
 						
 						if (config.getPolicyGroup().getSeason().equals(Season.WINTER)) {
@@ -92,9 +93,9 @@ public class Analyzer {
 								smartRoomUpdates.get(config.getSmartRoom().getId()).put(SensorType.TEMPERATURE, Configurator.OPT_TEMP_CODE);
 							}
 						}
-				
+						
 						break;
-					
+						
 					case MOTION:
 						
 						// reaction
@@ -108,13 +109,17 @@ public class Analyzer {
 							smartRoomUpdates.get(config.getSmartRoom().getId()).put(SensorType.MOTION, Configurator.OFF);
 						}
 						break;
-					
+						
 					case CONTACT:
 						// sensor.getValue() can be 0 or 1 (inactive, active)
 						smartRoomUpdates.get(config.getSmartRoom().getId()).put(SensorType.CONTACT, (int)sensor.getValue());						
 						break;
+					}
 				}
 			}
+		} catch (Exception e) {
+			LOGGER.error("[Analyzer]::[analyzeSensorsValue] --- " + e.getMessage());
+			e.printStackTrace();
 		}
 		
 		// Notify the Planner
@@ -127,8 +132,9 @@ public class Analyzer {
 	 */
 	private void setActualConfigurations(Map<Integer, SmartRoom> smartRooms) {
 		if (this.actualConfigurations == null) this.actualConfigurations = new HashMap<Integer, Configuration>();
-		
+
 		for (SmartRoom sm : smartRooms.values()) {
+
 			if (!actualConfigurations.containsKey(sm.getId())) {
 				Configuration config = new Configuration(sm, null, null);
 				actualConfigurations.put(sm.getId(), config);
@@ -137,15 +143,20 @@ public class Analyzer {
 				this.actualConfigurations.get(sm.getId()).getSensors().put(sensor.getType(), sensor);
 			}
 			
-			for (PolicyGroup group : this.groups.get(sm.getId())) {
+			for (PolicyGroup group : this.policyGroups.get(sm.getId())) {
 				if (!group.isActive() && group.getStartDate().compareTo(this.clock.toLocalDate()) <= 0 && group.getEndDate().compareTo(this.clock.toLocalDate()) > 0) {
 					group.setActive(true);
 					this.actualConfigurations.get(sm.getId()).setPolicyGroup(group);
+				} else if (group.isActive()){
+					this.actualConfigurations.get(sm.getId()).setPolicyGroup(group);
 				}
 			}
+
 			for (Policy policy : this.actualConfigurations.get(sm.getId()).getPolicyGroup().getPolicies()) {
 				if (!policy.isActive() && policy.getStartHour().getHour() <= this.clock.getHour() && this.clock.getHour()< policy.getEndHour().getHour()) {
 					policy.setActive(true);
+					this.actualConfigurations.get(sm.getId()).setPolicy(policy);
+				} else {
 					this.actualConfigurations.get(sm.getId()).setPolicy(policy);
 				}
 			}

@@ -11,5 +11,5 @@ import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.SmartRoom;
 @Repository
 public interface PolicyGroupRepository extends JpaRepository<PolicyGroup, Integer>{
 
-	List<PolicyGroup> findAllBySmartRoom(List<SmartRoom> smartRooms);
+	List<PolicyGroup> findAllBySmartRoom(SmartRoom smartRooms);
 }

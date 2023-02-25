@@ -13,6 +13,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -44,9 +47,10 @@ public class PolicyGroup {
 	private SmartRoom smartRoom;
 	
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "policyGroup")
+	@LazyCollection(LazyCollectionOption.FALSE)
 	@JsonManagedReference
 	private List<Policy> policies;
-	
+
 	public PolicyGroup() {}
 
 }

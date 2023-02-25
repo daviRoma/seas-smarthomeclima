@@ -14,7 +14,6 @@ import it.univaq.disim.seas.smarthomeclima.knowledgebase.business.PolicyGroupSer
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.business.exception.BusinessException;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.business.repositories.PolicyGroupRepository;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.PolicyGroup;
-import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.SmartRoom;
 
 @Service
 @Transactional
@@ -42,9 +41,9 @@ public class PolicyGroupServiceImpl implements PolicyGroupService {
 	}
 	
 	@Override
-	public Map<Integer, List<PolicyGroup>> findAllBySmartRooms(List<SmartRoom> smartRooms) throws BusinessException {
+	public Map<Integer, List<PolicyGroup>> findAllBySmartRooms() throws BusinessException {
 		Map<Integer, List<PolicyGroup>> response = new HashMap<Integer, List<PolicyGroup>>();
-		List<PolicyGroup> queryResult = this.policyGroupRepository.findAllBySmartRoom(smartRooms);
+		List<PolicyGroup> queryResult = this.policyGroupRepository.findAll();
 		
 		try {
 			if (queryResult.isEmpty()) return null;
