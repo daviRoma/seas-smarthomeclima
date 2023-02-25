@@ -1,6 +1,7 @@
 package it.univaq.disim.seas.smarthomeclima.analyzer;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +51,7 @@ public class Analyzer {
 		
 		Map<Integer, HashMap<SensorType, Integer>> smartRoomUpdates = new HashMap<Integer, HashMap<SensorType, Integer>>();
 		
-		this.groups = this.policyGroupService.findAllBySmartRooms((List<SmartRoom>)smartRooms.values());
+		this.groups = this.policyGroupService.findAllBySmartRooms( new ArrayList<SmartRoom>(smartRooms.values()));
 		
 		// build a configuration map
 		this.setActualConfigurations(smartRooms);

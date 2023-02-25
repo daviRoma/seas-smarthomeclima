@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -20,27 +19,27 @@ public class MqttBroker implements MqttCallback {
 
 	private static Logger LOGGER = LoggerFactory.getLogger(MqttBroker.class);
 
-	int k = 0;
 	MqttClient client;
-	Map<Integer, String> messages = new ConcurrentHashMap<Integer,String>();
-	Map<Integer, String> topics = new ConcurrentHashMap<Integer,String>();
+	List<String> messages = new ArrayList<String>();
+	List<String> topics = new ArrayList<String>();
+	
 	Map<String, List<String>> channelData = new HashMap<String, List<String>>();
 
 	public MqttBroker() {}
 
-	public Map<Integer, String> getMessages() {
+	public List<String> getMessages() {
 		return messages;
 	}
 
-	public void setMessages(Map<Integer, String> messages) {
+	public void setMessages(List<String> messages) {
 		this.messages = messages;
 	}
 
-	public Map<Integer, String> getTopics() {
+	public List<String> getTopics() {
 		return topics;
 	}
 
-	public void setTopics(Map<Integer, String> topics) {
+	public void setTopics(List<String> topics) {
 		this.topics = topics;
 	}
 
@@ -53,11 +52,8 @@ public class MqttBroker implements MqttCallback {
 	}
 
 	public void messageArrived(String topic, MqttMessage message) throws Exception {
-
-		this.messages.put(this.k,message.toString());
-		this.topics.put(this.k , topic);
-		this.k %= 1000;
-		this.k++;
+		this.messages.add(message.toString());
+		this.topics.add(topic);
 	}
 	
 	public void clear(){
@@ -78,6 +74,8 @@ public class MqttBroker implements MqttCallback {
 		MqttMessage message = new MqttMessage();
 		
 		if (this.channelData.containsKey(channel)) this.channelData.get(channel).add(mess);
+		
+		this.topics.add(channel);
 
 		try {
 			LOGGER.info("[MqttBroker]::[publish]::Send message to " + channel);
@@ -87,6 +85,8 @@ public class MqttBroker implements MqttCallback {
 			
 			message.setPayload(mess.getBytes());
 			message.setQos(2);
+			this.messages.add(message.toString());
+			
 			client.publish(channel, message);
 			client.disconnect();
 		} catch (MqttException e) {

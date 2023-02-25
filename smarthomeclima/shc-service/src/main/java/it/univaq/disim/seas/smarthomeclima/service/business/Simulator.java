@@ -21,6 +21,7 @@ import it.univaq.disim.seas.smarthomeclima.knowledgebase.business.PianificationS
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.business.SmartRoomService;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.business.exception.BusinessException;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.Actuator;
+import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.Configurator;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.MessageChannel;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.Pianification;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.RoomType;
@@ -127,7 +128,8 @@ public class Simulator extends Thread {
 			Pianification p = pianifications.get(sm.getId());
 			
 			for (Sensor s : sm.getSensors()) {
-				double randomStep = (double)Math.floor(Math.random() * (1 - 0 + 0.1) + 0);
+//				double randomStep = (double)Math.floor(Math.random() * (1 - 0 + 0.1) + 0);
+				double randomStep = Math.round(1 * (1 + Math.random()) * 10.0) / 10.0;
 				int randomFlag = (int)Math.floor(Math.random() * (100 - 1 + 1) +1);
 				
 				try {
@@ -177,6 +179,7 @@ public class Simulator extends Thread {
 							.replace("{actId}", String.valueOf(act.getId())),  
 							this.objectMapper.writeValueAsString(new ChannelPayload(act.getId(), act.getPower()))
 					);					
+					
 				} catch (JsonProcessingException e) {
 					e.printStackTrace();
 				}
@@ -191,6 +194,7 @@ public class Simulator extends Thread {
 					for (Actuator act : sm.getActuators()) {
 						if (act.getId() == payload.getId()) {
 							act.setPower((int)payload.getValue());
+							act.setActive(true);
 							actuators.add(act);
 						}
 					}
