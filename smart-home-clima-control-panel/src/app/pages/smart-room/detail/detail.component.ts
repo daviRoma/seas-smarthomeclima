@@ -17,7 +17,6 @@ import { DeleteSmartRoomComponent } from 'src/app/features/smart-room/components
 
 import { MatDialog } from '@angular/material/dialog';
 
-import { Channel, Monitor } from 'src/app/models/monitor.model';
 import { SmartRoom, SmartRoomRequest } from 'src/app/models/smart-room.model';
 
 import { SmartRoomDialogConf, DeleteDialogConf } from 'src/app/config/dialog.config';

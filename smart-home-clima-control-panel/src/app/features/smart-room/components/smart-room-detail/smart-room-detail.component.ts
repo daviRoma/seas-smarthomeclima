@@ -57,7 +57,7 @@ export class SmartRoomDetailComponent implements OnInit, OnDestroy {
     console.log("[Set]::[actuatorValues]", values);
     this._motionValues = [...values];
     this.powerLineChartData.datasets[0].data = [...values];
-    this.powerLineChartData = {...this.lineChartData};
+    this.powerLineChartData = {...this.powerLineChartData};
   }
 
   private _temperatureValues: number[];

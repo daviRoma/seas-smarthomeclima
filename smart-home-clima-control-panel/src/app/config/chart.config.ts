@@ -8,28 +8,29 @@ export const chartDatasetsTemperature = {
     borderColor: '#c94939',
     tension: 0.5,
     pointStyle: 'circle',
-    pointRadius: 10,
-    pointHoverRadius: 15
+    pointRadius: 6,
+    pointHoverRadius: 10
 };
 
 export const chartDatasetsMotion = {
     data: [] = [],
     label: 'Motion',
-    borderColor: '##2b84e9',
+    borderColor: '#2b84e9',
     tension: 0.5,
     pointStyle: 'circle',
-    pointRadius: 10,
-    pointHoverRadius: 15
+    pointRadius: 6,
+    pointHoverRadius: 10
 };
 
 export const chartDatasetsPower = {
     data: [] = [],
     label: 'Power',
-    borderColor: '##2b84e9',
+    borderColor: '#268139',
+    backgroundColor: '#56e674',
     tension: 0.5,
     pointStyle: 'circle',
-    pointRadius: 10,
-    pointHoverRadius: 15
+    pointRadius: 6,
+    pointHoverRadius: 10
 };
 
 export const baseLineChartLabels = [
