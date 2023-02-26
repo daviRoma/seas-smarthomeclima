@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -21,7 +22,6 @@ import it.univaq.disim.seas.smarthomeclima.knowledgebase.business.PianificationS
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.business.SmartRoomService;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.business.exception.BusinessException;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.Actuator;
-import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.Configurator;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.MessageChannel;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.Pianification;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.RoomType;
@@ -46,6 +46,9 @@ public class Simulator extends Thread {
 	@Autowired
 	private MqttBroker broker;
 	
+	@Autowired
+	private MqttBroker actuatorBroker;
+	
 	private List<SmartRoom> smartRooms;
 	private boolean isStarted = false;
 	
@@ -67,7 +70,8 @@ public class Simulator extends Thread {
 		// set topics
 		this.broker.setChannelData(MessageChannel.SENSOR_CHANNEL);
 		this.broker.setChannelData(MessageChannel.ACTUATOR_CHANNEL);
-		this.broker.setChannelData(MessageChannel.MONITOR_ACTUATOR_CHANNEL);
+		
+		this.actuatorBroker.subscribe(MessageChannel.ACTUATOR_CHANNEL);
 		
 		for (SmartRoom sm : this.smartRooms) {
 			for (Sensor sns : sm.getSensors()) {
@@ -126,10 +130,10 @@ public class Simulator extends Thread {
 		
 		for (SmartRoom sm : this.smartRooms) {
 			Pianification p = pianifications.get(sm.getId());
+			Random rd = new Random();
 			
 			for (Sensor s : sm.getSensors()) {
-//				double randomStep = (double)Math.floor(Math.random() * (1 - 0 + 0.1) + 0);
-				double randomStep = Math.round(1 * (1 + Math.random()) * 10.0) / 10.0;
+				double randomStep = Math.floor(rd.nextDouble() * 10) / 10;
 				int randomFlag = (int)Math.floor(Math.random() * (100 - 1 + 1) +1);
 				
 				try {
@@ -171,36 +175,59 @@ public class Simulator extends Thread {
 			}
 			
 			for (Actuator act : sm.getActuators()) {
-				try {
-					// send actuator data where control panel are listening
-					this.broker.publish(
-						MessageChannel.MONITOR_ACTUATOR_CHANNEL
-							.replace("{srId}", Integer.toString(sm.getId()))
-							.replace("{actId}", String.valueOf(act.getId())),  
-							this.objectMapper.writeValueAsString(new ChannelPayload(act.getId(), act.getPower()))
-					);					
-					
-				} catch (JsonProcessingException e) {
-					e.printStackTrace();
-				}
+//				try {
+//					// send actuator data where control panel are listening
+//					this.broker.publish(
+//						MessageChannel.MONITOR_ACTUATOR_CHANNEL
+//							.replace("{srId}", Integer.toString(sm.getId()))
+//							.replace("{actId}", String.valueOf(act.getId())),  
+//							this.objectMapper.writeValueAsString(new ChannelPayload(act.getId(), act.getPower()))
+//					);					
+//					
+//				} catch (JsonProcessingException e) {
+//					e.printStackTrace();
+//				}
 			}
 		}
 		// subscribe to actuators channels and update power on the database
 		List<Actuator> actuators = new ArrayList<Actuator>();
+		
 		try {
-			for (String message : this.broker.getChannelData().get(MessageChannel.ACTUATOR_CHANNEL)) {
-				ChannelPayload payload = this.objectMapper.readValue(message, ChannelPayload.class);
-				for (SmartRoom sm : this.smartRooms) {
-					for (Actuator act : sm.getActuators()) {
-						if (act.getId() == payload.getId()) {
-							act.setPower((int)payload.getValue());
-							act.setActive(true);
-							actuators.add(act);
-						}
+			if (!this.actuatorBroker.getMessages().isEmpty()) {
+				for (Map.Entry<String, List<String>> channelData : this.actuatorBroker.getChannelData().entrySet()) {
+					if (channelData.getValue().isEmpty()) continue;
+					
+					for (String message : channelData.getValue()) {
+						ChannelPayload payload = objectMapper.readValue(message, ChannelPayload.class);
+						for (SmartRoom sm : this.smartRooms) {
+							for (Actuator act : sm.getActuators()) {
+								if (act.getId() == payload.getId()) {
+									// send actuator data where control panel are listening
+									this.broker.publish(
+										MessageChannel.MONITOR_ACTUATOR_CHANNEL
+											.replace("{srId}", Integer.toString(sm.getId()))
+											.replace("{actId}", String.valueOf(act.getId())),  
+											this.objectMapper.writeValueAsString(new ChannelPayload(act.getId(), act.getPower()))
+									);		
+								}
+							}
+						}			
 					}
 				}
 			}
-			if (!actuators.isEmpty()) this.actuatorService.upsertMultipleActuators(actuators);
+//			for (String message : this.actuatorBroker.getChannelData().get(MessageChannel.ACTUATOR_CHANNEL)) {
+//				ChannelPayload payload = this.objectMapper.readValue(message, ChannelPayload.class);
+//				for (SmartRoom sm : this.smartRooms) {
+//					for (Actuator act : sm.getActuators()) {
+//						if (act.getId() == payload.getId()) {
+//							act.setPower((int)payload.getValue());
+//							act.setActive(true);
+//							actuators.add(act);
+//						}
+//					}
+//				}
+//			}
+//			if (!actuators.isEmpty()) this.actuatorService.upsertMultipleActuators(actuators);
 			
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();

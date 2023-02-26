@@ -51,7 +51,7 @@ public class Planner {
 		this.activePianifications = this.pianificationService.getAllActive(actualConfigurations.keySet());
 		
 		for (Map.Entry<Integer, HashMap<SensorType, Integer>> entry : smartRoomStates.entrySet()) {
-			
+
 			actions.putIfAbsent(entry.getKey(), new ArrayList<Execution>());
 			
 			// Check if active plan can be deactivated
@@ -101,13 +101,13 @@ public class Planner {
 						// Get all actuator of type RADIATOR
 						for (Actuator act : actualConfigurations.get(entry.getKey()).getSmartRoom().getActuators()) {
 							if (act.getType().equals(ActuatorType.RADIATOR)) {
-								actions.get(entry.getKey()).add(this.setRadiator(temperatureCode, modeValues.get(0), act.getId()));								
+								actions.get(entry.getKey()).add(new Execution(act.getId(), modeValues.get(0)));
 							}
 						}
 					} else {
 						for (Actuator act : actualConfigurations.get(entry.getKey()).getSmartRoom().getActuators()) {
 							if (act.getType().equals(ActuatorType.CONDITIONER)) {
-								actions.get(entry.getKey()).add(this.setConditioner(temperatureCode, modeValues.get(0), act.getId()));								
+								actions.get(entry.getKey()).add(new Execution(act.getId(), modeValues.get(0)));								
 							}
 						}
 					}
@@ -118,20 +118,20 @@ public class Planner {
 						// Get all actuator of type RADIATOR
 						for (Actuator act : actualConfigurations.get(entry.getKey()).getSmartRoom().getActuators()) {
 							if (act.getType().equals(ActuatorType.RADIATOR)) {
-								actions.get(entry.getKey()).add(this.setRadiator(temperatureCode, modeValues.size() > 1 ? modeValues.get(1) : modeValues.get(0), act.getId()));								
+								actions.get(entry.getKey()).add(new Execution(act.getId(), modeValues.size() > 1 ? modeValues.get(1) : modeValues.get(0)));
 							}
 						}
 					} else {
 						for (Actuator act : actualConfigurations.get(entry.getKey()).getSmartRoom().getActuators()) {
 							if (act.getType().equals(ActuatorType.CONDITIONER)) {
-								actions.get(entry.getKey()).add(this.setConditioner(temperatureCode, modeValues.size() > 1 ? modeValues.get(1) : modeValues.get(0), act.getId()));								
+								actions.get(entry.getKey()).add(new Execution(act.getId(), modeValues.size() > 1 ? modeValues.get(1) : modeValues.get(0)));
 							}
 						}
 					}
 					// close window
 					for (Actuator act : actualConfigurations.get(entry.getKey()).getSmartRoom().getActuators()) {
 						if (act.getType().equals(ActuatorType.WINDOW)) {
-							actions.get(entry.getKey()).add(this.closeWindow(contact, act.getId()));								
+							actions.get(entry.getKey()).add(new Execution(act.getId(), Configurator.ON));								
 						}
 					}
 					targetPianificationTime.plusMinutes(Configurator.MODE_DURATION.get(actualConfigurations.get(entry.getKey()).getPolicyGroup().getMode()));
@@ -146,20 +146,30 @@ public class Planner {
 						for (Actuator act : actualConfigurations.get(entry.getKey()).getSmartRoom().getActuators()) {
 							if (act.getType().equals(ActuatorType.RADIATOR)) {
 								// use the maximum power of the power mode
-								actions.get(entry.getKey()).add(this.setRadiator(temperatureCode, Configurator.MODE_POWER.get(Mode.POWER).get(Configurator.MODE_POWER.get(Mode.POWER).size()-1), act.getId()));								
+								actions.get(entry.getKey()).add(
+									new Execution(
+										act.getId(), 
+										Configurator.MODE_POWER.get(Mode.POWER).get(Configurator.MODE_POWER.get(Mode.POWER).size()-1)
+									)
+								);								
 							}
 						}
 					} else {
 						for (Actuator act : actualConfigurations.get(entry.getKey()).getSmartRoom().getActuators()) {
 							if (act.getType().equals(ActuatorType.CONDITIONER)) {
-								actions.get(entry.getKey()).add(this.setConditioner(temperatureCode, Configurator.MODE_POWER.get(Mode.POWER).get(Configurator.MODE_POWER.get(Mode.POWER).size()-1), act.getId()));								
+								actions.get(entry.getKey()).add(
+									new Execution(
+										act.getId(), 
+										Configurator.MODE_POWER.get(Mode.POWER).get(Configurator.MODE_POWER.get(Mode.POWER).size()-1)
+									)
+								);
 							}
 						}
 					}
 					// close window
 					for (Actuator act : actualConfigurations.get(entry.getKey()).getSmartRoom().getActuators()) {
 						if (act.getType().equals(ActuatorType.WINDOW)) {
-							actions.get(entry.getKey()).add(this.closeWindow(contact, act.getId()));								
+							actions.get(entry.getKey()).add(new Execution(act.getId(), Configurator.ON));								
 						}
 					}
 					targetPianificationTime.plusMinutes(Configurator.MODE_DURATION.get(Mode.POWER));
@@ -183,53 +193,6 @@ public class Planner {
 								
 		// Notify the Executor		
 		executor.executor(actions);
-	}
-	
-
-	/**
-	 * Set the room conditioner power
-	 * @param temp
-	 * @param power
-	 * @param actuatorId
-	 * @return Execution
-	 */
-	private Execution setConditioner(Integer temp, int power, int actuatorId) {
-
-		// set the conditioner to the power selected 
-		if (temp == Configurator.LOW_TEMP_CODE) {
-			return new Execution(actuatorId, power);
-		}
-		return null;
-	}
-	
-	/**
-	 * Set the room radiator power
-	 * @param temp
-	 * @param power
-	 * @param actuatorId
-	 * @return Execution
-	 */
-	private Execution setRadiator(Integer temp, int power, int actuatorId) {
-
-		// set the radiator to the power selected
-		if ( temp == Configurator.HIGH_TEMP_CODE) {	
-			return new Execution(actuatorId, power);
-		}
-		return null;
-	}
-	
-	/**
-	 * Close the smart window.
-	 * @param contact
-	 * @param actuatorId
-	 * @return Execution
-	 */
-	private Execution closeWindow(Integer contact, int actuatorId) {
-
-		if ( contact == Configurator.OFF) {	
-			return new Execution(actuatorId, Configurator.ON);
-		}
-		return null;
 	}
 	
 }							

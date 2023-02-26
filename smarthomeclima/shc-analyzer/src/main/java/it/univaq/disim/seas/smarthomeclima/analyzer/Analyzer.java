@@ -48,7 +48,7 @@ public class Analyzer {
 		LOGGER.info("[Analyzer]::[analyzeSensorsValue] --- Run analyzer");
 		this.clock = clock;
 		
-		Map<Integer, HashMap<SensorType, Integer>> smartRoomUpdates = new HashMap<Integer, HashMap<SensorType, Integer>>();
+		Map<Integer, HashMap<SensorType, Integer>> smartRoomsData = new HashMap<Integer, HashMap<SensorType, Integer>>();
 		
 		// Get policies
 		this.policyGroups = this.policyGroupService.findAllBySmartRooms();
@@ -58,62 +58,66 @@ public class Analyzer {
 		
 		try {
 			for (Configuration config : this.actualConfigurations.values()) {
+				
+				// inizialize result map
+				smartRoomsData.put(config.getSmartRoom().getId(), new HashMap<SensorType, Integer>());
+				
 				for (Sensor sensor : config.getSmartRoom().getSensors()) {
 					
 					switch (sensor.getType()) {
 					
-					case TEMPERATURE:
-						
-						if (config.getPolicyGroup().getSeason().equals(Season.WINTER)) {
-							// danger range
-							if (sensor.getValue() <= (config.getPolicy().getOptimalTemperature() - Policy.OPTIMAL_MARGIN - config.getPolicy().getDangerMargin())) 
-								smartRoomUpdates.get(config.getSmartRoom().getId()).put(SensorType.TEMPERATURE, Configurator.DANGER_LOW_TEMP_CODE);
-							// danger priority (danger temp -1)
-							if (sensor.getValue() <= (config.getPolicy().getOptimalTemperature() - Policy.OPTIMAL_MARGIN - config.getPolicy().getDangerMargin() - 1)) 
-								smartRoomUpdates.get(config.getSmartRoom().getId()).put(SensorType.TEMPERATURE, Configurator.DANGER_PRIORITY_LOW_TEMP_CODE);
-							// reactive range
-							else if (sensor.getValue() <= (config.getPolicy().getOptimalTemperature() - Policy.OPTIMAL_MARGIN - config.getPolicy().getReactiveMargin()))
-								smartRoomUpdates.get(config.getSmartRoom().getId()).put(SensorType.TEMPERATURE, Configurator.LOW_TEMP_CODE);
-							// optimal
-							else {
-								smartRoomUpdates.get(config.getSmartRoom().getId()).put(SensorType.TEMPERATURE, Configurator.OPT_TEMP_CODE);
-							}
-						} else {
-							// danger range
-							if (sensor.getValue() >= (config.getPolicy().getOptimalTemperature() + Policy.OPTIMAL_MARGIN + config.getPolicy().getDangerMargin()))
-								smartRoomUpdates.get(config.getSmartRoom().getId()).put(SensorType.TEMPERATURE, Configurator.DANGER_HIGH_TEMP_CODE);
-							// danger priority (danger temp +1)
-							if (sensor.getValue() >= (config.getPolicy().getOptimalTemperature() + Policy.OPTIMAL_MARGIN + config.getPolicy().getDangerMargin() + 1))
-								smartRoomUpdates.get(config.getSmartRoom().getId()).put(SensorType.TEMPERATURE, Configurator.DANGER_HIGH_TEMP_CODE);
-							// reactive range
-							else if (sensor.getValue() >= (config.getPolicy().getOptimalTemperature() + Policy.OPTIMAL_MARGIN + config.getPolicy().getReactiveMargin())) 
-								smartRoomUpdates.get(config.getSmartRoom().getId()).put(SensorType.TEMPERATURE, Configurator.HIGH_TEMP_CODE);
-							// optimal
-							else {
-								smartRoomUpdates.get(config.getSmartRoom().getId()).put(SensorType.TEMPERATURE, Configurator.OPT_TEMP_CODE);
-							}
-						}
-						
-						break;
-						
-					case MOTION:
-						
-						// reaction
-						if (sensor.getValue() == 1) {
-							// Remove the temp sensor from the update map
-							if (config.getSensors().get(SensorType.TEMPERATURE).getValue() < (config.getPolicy().getOptimalTemperature() - Policy.OPTIMAL_MARGIN)) {
-								smartRoomUpdates.get(config.getSmartRoom().getId()).put(SensorType.MOTION, Configurator.ON);
+						case TEMPERATURE:
+							
+							if (config.getPolicyGroup().getSeason().equals(Season.WINTER)) {
+								// danger range
+								if (sensor.getValue() <= (config.getPolicy().getOptimalTemperature() - Policy.OPTIMAL_MARGIN - config.getPolicy().getDangerMargin())) 
+									smartRoomsData.get(config.getSmartRoom().getId()).put(SensorType.TEMPERATURE, Configurator.DANGER_LOW_TEMP_CODE);
+								// danger priority (danger temp -1)
+								if (sensor.getValue() <= (config.getPolicy().getOptimalTemperature() - Policy.OPTIMAL_MARGIN - config.getPolicy().getDangerMargin() - 1)) 
+									smartRoomsData.get(config.getSmartRoom().getId()).put(SensorType.TEMPERATURE, Configurator.DANGER_PRIORITY_LOW_TEMP_CODE);
+								// reactive range
+								else if (sensor.getValue() <= (config.getPolicy().getOptimalTemperature() - Policy.OPTIMAL_MARGIN - config.getPolicy().getReactiveMargin()))
+									smartRoomsData.get(config.getSmartRoom().getId()).put(SensorType.TEMPERATURE, Configurator.LOW_TEMP_CODE);
+								// optimal
+								else {
+									smartRoomsData.get(config.getSmartRoom().getId()).put(SensorType.TEMPERATURE, Configurator.OPT_TEMP_CODE);
+								}
+							} else {
+								// danger range
+								if (sensor.getValue() >= (config.getPolicy().getOptimalTemperature() + Policy.OPTIMAL_MARGIN + config.getPolicy().getDangerMargin()))
+									smartRoomsData.get(config.getSmartRoom().getId()).put(SensorType.TEMPERATURE, Configurator.DANGER_HIGH_TEMP_CODE);
+								// danger priority (danger temp +1)
+								if (sensor.getValue() >= (config.getPolicy().getOptimalTemperature() + Policy.OPTIMAL_MARGIN + config.getPolicy().getDangerMargin() + 1))
+									smartRoomsData.get(config.getSmartRoom().getId()).put(SensorType.TEMPERATURE, Configurator.DANGER_HIGH_TEMP_CODE);
+								// reactive range
+								else if (sensor.getValue() >= (config.getPolicy().getOptimalTemperature() + Policy.OPTIMAL_MARGIN + config.getPolicy().getReactiveMargin())) 
+									smartRoomsData.get(config.getSmartRoom().getId()).put(SensorType.TEMPERATURE, Configurator.HIGH_TEMP_CODE);
+								// optimal
+								else {
+									smartRoomsData.get(config.getSmartRoom().getId()).put(SensorType.TEMPERATURE, Configurator.OPT_TEMP_CODE);
+								}
 							}
 							
-						} else {
-							smartRoomUpdates.get(config.getSmartRoom().getId()).put(SensorType.MOTION, Configurator.OFF);
-						}
-						break;
-						
-					case CONTACT:
-						// sensor.getValue() can be 0 or 1 (inactive, active)
-						smartRoomUpdates.get(config.getSmartRoom().getId()).put(SensorType.CONTACT, (int)sensor.getValue());						
-						break;
+							break;
+							
+						case MOTION:
+							
+							// reaction
+							if (sensor.getValue() == 1) {
+								// Remove the temp sensor from the update map
+								if (config.getSensors().get(SensorType.TEMPERATURE).getValue() < (config.getPolicy().getOptimalTemperature() - Policy.OPTIMAL_MARGIN)) {
+									smartRoomsData.get(config.getSmartRoom().getId()).put(SensorType.MOTION, Configurator.ON);
+								}
+								
+							} else {
+								smartRoomsData.get(config.getSmartRoom().getId()).put(SensorType.MOTION, Configurator.OFF);
+							}
+							break;
+							
+						case CONTACT:
+							// sensor.getValue() can be 0 or 1 (inactive, active)
+							smartRoomsData.get(config.getSmartRoom().getId()).put(SensorType.CONTACT, (int)sensor.getValue());						
+							break;
 					}
 				}
 			}
@@ -123,7 +127,7 @@ public class Analyzer {
 		}
 		
 		// Notify the Planner
-		planner.planning(smartRoomUpdates, this.actualConfigurations, this.clock);
+		planner.planning(smartRoomsData, this.actualConfigurations, this.clock);
 	}
 
 	/**
@@ -139,26 +143,33 @@ public class Analyzer {
 				Configuration config = new Configuration(sm, null, null);
 				actualConfigurations.put(sm.getId(), config);
 			}
-			for (Sensor sensor : sm.getSensors()) {
-				this.actualConfigurations.get(sm.getId()).getSensors().put(sensor.getType(), sensor);
+			// set sensors
+			if (sm.getSensors().isEmpty()) {
+				for (Sensor sensor : sm.getSensors()) {
+					this.actualConfigurations.get(sm.getId()).getSensors().put(sensor.getType(), sensor);
+				}				
 			}
 			
-			for (PolicyGroup group : this.policyGroups.get(sm.getId())) {
-				if (!group.isActive() && group.getStartDate().compareTo(this.clock.toLocalDate()) <= 0 && group.getEndDate().compareTo(this.clock.toLocalDate()) > 0) {
-					group.setActive(true);
-					this.actualConfigurations.get(sm.getId()).setPolicyGroup(group);
-				} else if (group.isActive()){
-					this.actualConfigurations.get(sm.getId()).setPolicyGroup(group);
+			// set active policy group
+			PolicyGroup policyGroup = this.actualConfigurations.get(sm.getId()).getPolicyGroup();
+			if (policyGroup == null || (policyGroup != null && (policyGroup.getStartDate().compareTo(this.clock.toLocalDate()) > 0 || policyGroup.getEndDate().compareTo(this.clock.toLocalDate()) < 0))) {
+				for (PolicyGroup group : this.policyGroups.get(sm.getId())) {
+					if (group.getStartDate().compareTo(this.clock.toLocalDate()) <= 0 && group.getEndDate().compareTo(this.clock.toLocalDate()) > 0) {
+						group.setActive(true);
+						this.actualConfigurations.get(sm.getId()).setPolicyGroup(group);
+					}
 				}
 			}
 
-			for (Policy policy : this.actualConfigurations.get(sm.getId()).getPolicyGroup().getPolicies()) {
-				if (!policy.isActive() && policy.getStartHour().getHour() <= this.clock.getHour() && this.clock.getHour()< policy.getEndHour().getHour()) {
-					policy.setActive(true);
-					this.actualConfigurations.get(sm.getId()).setPolicy(policy);
-				} else {
-					this.actualConfigurations.get(sm.getId()).setPolicy(policy);
-				}
+			// Set active policy
+			Policy currentPolicy = this.actualConfigurations.get(sm.getId()).getPolicy();
+			if (currentPolicy == null || (currentPolicy != null && (currentPolicy.getStartHour().getHour() > this.clock.getHour() || this.clock.getHour() > currentPolicy.getEndHour().getHour()))) {
+				for (Policy policy : this.actualConfigurations.get(sm.getId()).getPolicyGroup().getPolicies()) {
+					if (policy.getStartHour().getHour() <= this.clock.getHour() && this.clock.getHour()< policy.getEndHour().getHour()) {
+						policy.setActive(true);
+						this.actualConfigurations.get(sm.getId()).setPolicy(policy);
+					}
+				}				
 			}
 		}
 	}

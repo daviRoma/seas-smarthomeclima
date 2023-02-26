@@ -30,20 +30,20 @@ public class Executor {
 	 * @param actions
 	 */
 	public void executor(Map<Integer, ArrayList<Execution>> actions) {
-		LOGGER.info("[Executor]::[executor] --- Perform the planned actions");
+		LOGGER.info("[Executor]::[executor] --- Do the planned actions");
 		
 		ObjectMapper objectMapper = new ObjectMapper();
 
-		for (Map.Entry<Integer, ArrayList<Execution>> action : actions.entrySet()) {
-			
-			for (Execution exec : action.getValue()) {
-									
+		for (Integer key : actions.keySet()) {
+
+			for (Execution exec : actions.get(key)) {
+
 				try {
 					String payload = objectMapper.writeValueAsString(new ChannelPayload(exec.getActuatorId(), exec.getAction()));
 					
 					this.broker.publish(
 						MessageChannel.MONITOR_EXECUTOR_CHANNEL
-							.replace("{srId}", Integer.toString(action.getKey()))
+							.replace("{srId}", Integer.toString(key))
 							.replace("{actId}", Integer.toString(exec.getActuatorId())),
 							payload
 						);
@@ -51,7 +51,7 @@ public class Executor {
 					// actuators are listening
 					this.broker.publish(
 						MessageChannel.ACTUATOR_CHANNEL
-							.replace("{srId}", Integer.toString(action.getKey()))
+							.replace("{srId}", Integer.toString(key))
 							.replace("{actId}", Integer.toString(exec.getActuatorId())),
 							payload
 						);

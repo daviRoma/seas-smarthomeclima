@@ -220,6 +220,19 @@ public class DataLoader implements CommandLineRunner {
 			policy.setPolicyGroup(pg);	
 			policies.add(policy);
 		}
+		
+		// add range 23-00
+		Policy p = new Policy();
+		p.setStartHour(LocalDateTime.of(2023, 2, 1, 23, 1));
+		p.setEndHour(LocalDateTime.of(2023, 2, 2, 0, 0));
+		if (p.getStartHour().getHour() <= LocalDateTime.now().getHour()) {
+			p.setActive(true);
+		}
+		p.setDangerMargin(3);
+		p.setReactiveMargin(1);
+		p.setOptimalTemperature(winter ? temp - 1 : temp + 1);
+		p.setPolicyGroup(pg);
+		policies.add(p);
 		return policies;
 		
 	}
