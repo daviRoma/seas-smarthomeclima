@@ -57,9 +57,9 @@ public class DataLoader implements CommandLineRunner {
 			createData(1, RoomType.LIVING_ROOM);
 			// Dining room
 			createData(2, RoomType.DINING_ROOM);		
-			// bed room
+			// bed room 1
 			createData(3, RoomType.BED_ROOM);
-			// bed room
+			// bed room 2
 			createData(4, RoomType.BED_ROOM);			
 		} catch (BusinessException e) {
 			LOGGER.error("[Service]::[DataLoader]::[run] --- Error");
@@ -160,6 +160,9 @@ public class DataLoader implements CommandLineRunner {
 		
 		for (int i = 0; i < 23; i++) {
 			Policy policy = new Policy();
+			policy.setStartHour(LocalDateTime.of(2023, 2, 1, i, 1));
+			policy.setEndHour(LocalDateTime.of(2023, 2, 1, i+1, 0));
+			policy.setPolicyGroup(pg);	
 			
 			switch (i) {
 				case 0:
@@ -210,31 +213,47 @@ public class DataLoader implements CommandLineRunner {
 				default:
 					break;
 			}
-			policy.setStartHour(LocalDateTime.of(2023, 2, 1, i, 1));
-			policy.setEndHour(LocalDateTime.of(2023, 2, 1, i+1, 0));
-			if (policy.getStartHour().getHour() <= LocalDateTime.now().getHour() && LocalDateTime.now().getHour() < policy.getEndHour().getHour()) {
-				policy.setActive(true);
-			} else {
-				policy.setActive(false);				
-			}
-			policy.setPolicyGroup(pg);	
 			policies.add(policy);
 		}
 		
-		// add range 23-00
+		// add range 23:01-0:00
 		Policy p = new Policy();
 		p.setStartHour(LocalDateTime.of(2023, 2, 1, 23, 1));
 		p.setEndHour(LocalDateTime.of(2023, 2, 2, 0, 0));
-		if (p.getStartHour().getHour() <= LocalDateTime.now().getHour()) {
-			p.setActive(true);
-		}
 		p.setDangerMargin(3);
 		p.setReactiveMargin(1);
 		p.setOptimalTemperature(winter ? temp - 1 : temp + 1);
 		p.setPolicyGroup(pg);
-		policies.add(p);
-		return policies;
 		
+		policies.add(p);
+		
+		this.setActivePolicyByDate(policies);
+		
+		return policies;
 	}
 	
+	/**
+	 * Set current policy by current datetime
+	 * @param policies
+	 */
+	private void setActivePolicyByDate(List<Policy> policies) {
+		for (Policy p : policies) {
+			// es. 1:01 == 1:45 && 1:01 <= 1:45 && 2:00 > 1:45
+			if (
+				(
+					p.getStartHour().getHour() == LocalDateTime.now().getHour() && 
+					p.getStartHour().getMinute() <= LocalDateTime.now().getMinute() && 
+					p.getEndHour().getHour() > LocalDateTime.now().getHour() 
+				) ||
+				(
+					// es. 1:01 < 2:00 && 2:00 == 2:00 && 2:00 == 2:00
+					p.getStartHour().getHour() < LocalDateTime.now().getHour() && 
+					p.getEndHour().getHour() == LocalDateTime.now().getHour() &&
+					p.getEndHour().getMinute() == LocalDateTime.now().getMinute()				
+				)
+			) {
+				p.setActive(true);
+			}
+		}
+	}
 }

@@ -47,7 +47,7 @@ public class Simulator extends Thread {
 	private MqttBroker broker;
 	
 	@Autowired
-	private MqttBroker actuatorBroker;
+	private MqttBroker executorBroker;
 	
 	private List<SmartRoom> smartRooms;
 	private boolean isStarted = false;
@@ -71,7 +71,7 @@ public class Simulator extends Thread {
 		this.broker.setChannelData(MessageChannel.SENSOR_CHANNEL);
 		this.broker.setChannelData(MessageChannel.ACTUATOR_CHANNEL);
 		
-		this.actuatorBroker.subscribe(MessageChannel.ACTUATOR_CHANNEL);
+		this.executorBroker.subscribe(MessageChannel.MONITOR_EXECUTOR_CHANNEL);
 		
 		for (SmartRoom sm : this.smartRooms) {
 			for (Sensor sns : sm.getSensors()) {
@@ -120,12 +120,18 @@ public class Simulator extends Thread {
 		}
 	}
 	
+	/**
+	 * Simulate sensors and actuators behavior.
+	 * @throws BusinessException
+	 */
 	public void simulation() throws BusinessException {
 		Set<Integer> ids = new HashSet<Integer>();
+		List<Actuator> actuators = new ArrayList<Actuator>();
 
 		for (SmartRoom sm : this.smartRooms) {
 			ids.add(sm.getId());
 		}
+		
 		Map<Integer, Pianification> pianifications = this.pianificationService.getAllActive(ids);
 		
 		for (SmartRoom sm : this.smartRooms) {
@@ -174,34 +180,21 @@ public class Simulator extends Thread {
 				}
 			}
 			
-			for (Actuator act : sm.getActuators()) {
-//				try {
-//					// send actuator data where control panel are listening
-//					this.broker.publish(
-//						MessageChannel.MONITOR_ACTUATOR_CHANNEL
-//							.replace("{srId}", Integer.toString(sm.getId()))
-//							.replace("{actId}", String.valueOf(act.getId())),  
-//							this.objectMapper.writeValueAsString(new ChannelPayload(act.getId(), act.getPower()))
-//					);					
-//					
-//				} catch (JsonProcessingException e) {
-//					e.printStackTrace();
-//				}
-			}
-		}
-		// subscribe to actuators channels and update power on the database
-		List<Actuator> actuators = new ArrayList<Actuator>();
-		
-		try {
-			if (!this.actuatorBroker.getMessages().isEmpty()) {
-				for (Map.Entry<String, List<String>> channelData : this.actuatorBroker.getChannelData().entrySet()) {
-					if (channelData.getValue().isEmpty()) continue;
-					
-					for (String message : channelData.getValue()) {
-						ChannelPayload payload = objectMapper.readValue(message, ChannelPayload.class);
-						for (SmartRoom sm : this.smartRooms) {
-							for (Actuator act : sm.getActuators()) {
+			// subscribe to executor channels and simulate the actuators behavior
+			if (!this.executorBroker.getMessages().isEmpty()) {
+				try {
+					for (Actuator act : sm.getActuators()) {
+						for (Map.Entry<String, List<String>> channelData : this.executorBroker.getChannelData().entrySet()) {
+							if (channelData.getValue().isEmpty()) continue;
+							for (String message : channelData.getValue()) {
+								ChannelPayload payload = objectMapper.readValue(message, ChannelPayload.class);
 								if (act.getId() == payload.getId()) {
+									// update actuator on the database if is inactive
+									if (payload.getValue() > 0 && !act.isActive()) {
+										act.setActive(true);
+										act.setPower((int)payload.getValue());
+										actuators.add(act);
+									}
 									// send actuator data where control panel are listening
 									this.broker.publish(
 										MessageChannel.MONITOR_ACTUATOR_CHANNEL
@@ -211,31 +204,29 @@ public class Simulator extends Thread {
 									);		
 								}
 							}
-						}			
+							
+						}
 					}
+				} catch (JsonProcessingException e) {
+					e.printStackTrace();
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				} finally {
+					this.executorBroker.clear();
 				}
+				
 			}
-//			for (String message : this.actuatorBroker.getChannelData().get(MessageChannel.ACTUATOR_CHANNEL)) {
-//				ChannelPayload payload = this.objectMapper.readValue(message, ChannelPayload.class);
-//				for (SmartRoom sm : this.smartRooms) {
-//					for (Actuator act : sm.getActuators()) {
-//						if (act.getId() == payload.getId()) {
-//							act.setPower((int)payload.getValue());
-//							act.setActive(true);
-//							actuators.add(act);
-//						}
-//					}
-//				}
-//			}
-//			if (!actuators.isEmpty()) this.actuatorService.upsertMultipleActuators(actuators);
-			
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		} catch (IOException ex) {
-			ex.printStackTrace();
 		}
+		
+		// update actuators data on the database
+		if (!actuators.isEmpty()) this.actuatorService.upsertMultipleActuators(actuators);
+
 	}
 
+	/**
+	 * Termiate thread.
+	 * @throws InterruptedException
+	 */
 	public void terminate() throws InterruptedException {
 		this.isStarted = false;
 		this.join();

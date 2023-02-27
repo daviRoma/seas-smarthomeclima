@@ -169,7 +169,8 @@ public class Planner {
 					// close window
 					for (Actuator act : actualConfigurations.get(entry.getKey()).getSmartRoom().getActuators()) {
 						if (act.getType().equals(ActuatorType.WINDOW)) {
-							actions.get(entry.getKey()).add(new Execution(act.getId(), Configurator.ON));								
+							if (contact == Configurator.OFF) actions.get(entry.getKey()).add(new Execution(act.getId(), Configurator.ON));																
+							
 						}
 					}
 					targetPianificationTime.plusMinutes(Configurator.MODE_DURATION.get(Mode.POWER));

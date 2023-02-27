@@ -36,6 +36,7 @@ public class Monitor extends Thread {
 	
 	@Autowired
     private MqttBroker brokerSensors;
+	
 	@Autowired
     private MqttBroker brokerActuators;
     

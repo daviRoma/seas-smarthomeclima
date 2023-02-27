@@ -6,7 +6,7 @@ public final class MessageChannel {
 	public static final String SENSOR_CHANNEL = "smartroom/{srId}/sensor/{snsId}";
 	public static final String ACTUATOR_CHANNEL = "smartroom/{srId}/actuator/{actId}";
 	public static final String MONITOR_ACTUATOR_CHANNEL = "monitor/smartroom/{srId}/actuator/{actId}";
-	public static final String MONITOR_EXECUTOR_CHANNEL = "monitor/smartroom/{srId}/executor/{type}";
+	public static final String MONITOR_EXECUTOR_CHANNEL = "monitor/smartroom/{srId}/executor/{actId}";
 	
 	public final static String[] parseMessage(String s) {
 		return s.split(",");
@@ -14,10 +14,6 @@ public final class MessageChannel {
 
 	public final static String[] parseTopic(String s) {
 		return s.split("/");
-	}
-
-	public final static int getSmartRoomIdFromMessage(String msg) {
-		return Integer.parseInt(parseMessage(msg)[4]);
 	}
 
 	public final static int getSmartRoomIdFromTopic(String topic) {
