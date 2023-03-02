@@ -40,7 +40,7 @@ public class ActuatorController {
 		
 		for (Actuator act : request.getActuators()) {
 			act.setSmartRoom(sm);
-			this.actuatorService.createActuator(act);
+			this.actuatorService.createActuator(act); 
 		}
 	}
 	

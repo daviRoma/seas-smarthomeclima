@@ -74,8 +74,7 @@ public class MqttBroker implements MqttCallback {
 		MqttMessage message = new MqttMessage();
 		
 		if (this.channelData.containsKey(channel)) this.channelData.get(channel).add(mess);
-		
-		this.topics.add(channel);
+		else this.channelData.put(channel, new ArrayList<String>() {{ add(mess); }});
 
 		try {
 			LOGGER.info("[MqttBroker]::[publish]::Send message to " + channel);
@@ -96,7 +95,8 @@ public class MqttBroker implements MqttCallback {
 	}
 
 	public void subscribe(String channel) {
-
+		this.setChannelData(channel);
+		
 		try {
 			MemoryPersistence memoryPersistence = new MemoryPersistence();
 			client = new MqttClient("ws://localhost:8081", MqttClient.generateClientId(), memoryPersistence);

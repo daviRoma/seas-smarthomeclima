@@ -3,6 +3,7 @@ package it.univaq.disim.seas.smarthomeclima.executor;
 import java.util.ArrayList;
 import java.util.Map;
 
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,14 @@ public class Executor {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Executor.class);
 
 	@Autowired
-	private MqttBroker broker;
+	private MqttBroker brokerActators;
+	
+	@Autowired
+	private MqttBroker brokerExecutor;
 
+	@Autowired
+	private ObjectMapper objectMapper;
+	
 	/**
 	 * Executor.
 	 * For each room sends the actions generated from the planner. 
@@ -31,17 +38,15 @@ public class Executor {
 	 */
 	public void executor(Map<Integer, ArrayList<Execution>> actions) {
 		LOGGER.info("[Executor]::[executor] --- Do the planned actions");
-		
-		ObjectMapper objectMapper = new ObjectMapper();
-
+	    
 		for (Integer key : actions.keySet()) {
 
 			for (Execution exec : actions.get(key)) {
 
 				try {
-					String payload = objectMapper.writeValueAsString(new ChannelPayload(exec.getActuatorId(), exec.getAction()));
+					String payload = this.objectMapper.writeValueAsString(new ChannelPayload(exec.getActuatorId(), exec.getAction()));
 					
-					this.broker.publish(
+					this.brokerExecutor.publish(
 						MessageChannel.MONITOR_EXECUTOR_CHANNEL
 							.replace("{srId}", Integer.toString(key))
 							.replace("{actId}", Integer.toString(exec.getActuatorId())),
@@ -49,7 +54,7 @@ public class Executor {
 						);
 					
 					// actuators are listening
-					this.broker.publish(
+					this.brokerActators.publish(
 						MessageChannel.ACTUATOR_CHANNEL
 							.replace("{srId}", Integer.toString(key))
 							.replace("{actId}", Integer.toString(exec.getActuatorId())),

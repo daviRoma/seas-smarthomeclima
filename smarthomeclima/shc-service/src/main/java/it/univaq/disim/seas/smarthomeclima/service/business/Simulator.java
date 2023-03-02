@@ -1,12 +1,16 @@
 package it.univaq.disim.seas.smarthomeclima.service.business;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+
+import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +19,9 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import it.univaq.disim.seas.smarthomeclima.broker.MqttBroker;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.business.ActuatorService;
@@ -44,16 +51,20 @@ public class Simulator extends Thread {
 	private PianificationService pianificationService;
 	
 	@Autowired
-	private MqttBroker broker;
+	private MqttBroker brokerSensors;
+	
+	@Autowired
+	private MqttBroker brokerActuators;
 	
 	@Autowired
 	private MqttBroker executorBroker;
 	
-	private List<SmartRoom> smartRooms;
-	private boolean isStarted = false;
-	
+	@Autowired
 	private ObjectMapper objectMapper = new ObjectMapper();
 	
+	private List<SmartRoom> smartRooms;
+	private boolean isStarted = false;
+		
 	public Simulator() {}
 	
 	@Override
@@ -68,8 +79,8 @@ public class Simulator extends Thread {
 		}
 		
 		// set topics
-		this.broker.setChannelData(MessageChannel.SENSOR_CHANNEL);
-		this.broker.setChannelData(MessageChannel.ACTUATOR_CHANNEL);
+//		this.broker.setChannelData(MessageChannel.SENSOR_CHANNEL);
+//		this.broker.setChannelData(MessageChannel.ACTUATOR_CHANNEL);
 		
 		this.executorBroker.subscribe(MessageChannel.MONITOR_EXECUTOR_CHANNEL);
 		
@@ -91,7 +102,7 @@ public class Simulator extends Thread {
 				}
 				
 				try {
-					broker.publish(
+					this.brokerSensors.publish(
 						MessageChannel.SENSOR_CHANNEL
 							.replace("{srId}", String.valueOf(sm.getId()))
 							.replace("{snsId}", String.valueOf(sns.getId())), 
@@ -139,14 +150,14 @@ public class Simulator extends Thread {
 			Random rd = new Random();
 			
 			for (Sensor s : sm.getSensors()) {
-				double randomStep = Math.floor(rd.nextDouble() * 10) / 10;
+				double randomStep = truncateDecimal(Math.floor(rd.nextDouble() * 10) / 10, 1).doubleValue();
 				int randomFlag = (int)Math.floor(Math.random() * (100 - 1 + 1) +1);
 				
 				try {
 					if (s.getType().equals(SensorType.TEMPERATURE)) {
 						if (p != null && p.isActive()) {
 							s.setValue(s.getValue() + randomStep);
-							broker.publish(
+							this.brokerSensors.publish(
 								MessageChannel.SENSOR_CHANNEL
 									.replace("{srId}", String.valueOf(sm.getId()))
 									.replace("{snsId}", String.valueOf(s.getId())), 
@@ -154,7 +165,7 @@ public class Simulator extends Thread {
 							);
 						} else {
 							s.setValue(s.getValue() - randomStep);
-							broker.publish(
+							this.brokerSensors.publish(
 								MessageChannel.SENSOR_CHANNEL
 									.replace("{srId}", String.valueOf(sm.getId()))
 									.replace("{snsId}", String.valueOf(s.getId())),
@@ -165,7 +176,7 @@ public class Simulator extends Thread {
 						if (sm.getType().equals(RoomType.LIVING_ROOM)) {
 							if (randomFlag % 2 == 0) {
 								s.setValue(1);
-								broker.publish(
+								this.brokerSensors.publish(
 									MessageChannel.SENSOR_CHANNEL
 										.replace("{srId}", String.valueOf(sm.getId()))
 										.replace("{snsId}", String.valueOf(s.getId())), 
@@ -181,27 +192,28 @@ public class Simulator extends Thread {
 			}
 			
 			// subscribe to executor channels and simulate the actuators behavior
-			if (!this.executorBroker.getMessages().isEmpty()) {
+			if (!this.executorBroker.getMessages().isEmpty() && !this.executorBroker.getChannelData().get(MessageChannel.MONITOR_EXECUTOR_CHANNEL).isEmpty()) {
 				try {
 					for (Actuator act : sm.getActuators()) {
 						for (Map.Entry<String, List<String>> channelData : this.executorBroker.getChannelData().entrySet()) {
 							if (channelData.getValue().isEmpty()) continue;
+							
 							for (String message : channelData.getValue()) {
-								ChannelPayload payload = objectMapper.readValue(message, ChannelPayload.class);
+								ChannelPayload payload = (ChannelPayload)this.objectMapper.readValue(message, ChannelPayload.class);
 								if (act.getId() == payload.getId()) {
-									// update actuator on the database if is inactive
-									if (payload.getValue() > 0 && !act.isActive()) {
-										act.setActive(true);
-										act.setPower((int)payload.getValue());
-										actuators.add(act);
-									}
 									// send actuator data where control panel are listening
-									this.broker.publish(
+									this.brokerActuators.publish(
 										MessageChannel.MONITOR_ACTUATOR_CHANNEL
 											.replace("{srId}", Integer.toString(sm.getId()))
 											.replace("{actId}", String.valueOf(act.getId())),  
 											this.objectMapper.writeValueAsString(new ChannelPayload(act.getId(), act.getPower()))
-									);		
+									);	
+									// update actuator on the database if is inactive
+//									if (payload.getValue() > 0 && !act.isActive()) {
+//										act.setActive(true);
+//										act.setPower((int)payload.getValue());
+//										actuators.add(act);
+//									}
 								}
 							}
 							
@@ -223,6 +235,12 @@ public class Simulator extends Thread {
 
 	}
 
+	@PostConstruct
+	public void setUp() {
+		this.objectMapper.registerModule(new JavaTimeModule());
+		this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+	}
+	 
 	/**
 	 * Termiate thread.
 	 * @throws InterruptedException
@@ -233,6 +251,14 @@ public class Simulator extends Thread {
 		Thread.currentThread().interrupt();
 	    if (Thread.interrupted()) {
 	    	LOGGER.info("[Simulator]::[stopped]");
+	    }
+	}
+	
+	private static BigDecimal truncateDecimal(double x,int numberofDecimals) {
+	    if ( x > 0) {
+	        return new BigDecimal(String.valueOf(x)).setScale(numberofDecimals, BigDecimal.ROUND_FLOOR);
+	    } else {
+	        return new BigDecimal(String.valueOf(x)).setScale(numberofDecimals, BigDecimal.ROUND_CEILING);
 	    }
 	}
 }

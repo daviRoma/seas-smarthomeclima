@@ -78,7 +78,9 @@ public class Monitor extends Thread {
 
         while (this.isStarted) {
         	LOGGER.info("[Monitor]::[run] --- Clock: " + this.clock.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-			try {
+        	LOGGER.info("[Monitor]::[run] --- New Messages: " + this.brokerSensors.getMessages().size());
+
+        	try {
 				if (!this.brokerSensors.getMessages().isEmpty()){
 					this.getSensorsData();
 				} else {
@@ -111,7 +113,7 @@ public class Monitor extends Thread {
 	private void getSensorsData() throws BusinessException {
 		LocalDateTime clockTemp = this.clock;
 		
-		try {
+		try { 
 			ObjectMapper objectMapper = new ObjectMapper();
 
 			// build sensor map for each room
@@ -120,11 +122,12 @@ public class Monitor extends Thread {
 				if (channelData.getValue().isEmpty()) continue;
 				
 				for (String message : channelData.getValue()) {
-					ChannelPayload payload = objectMapper.readValue(message, ChannelPayload.class);
-					
-					if (this.smartRooms.containsKey(MessageChannel.getSmartRoomIdFromTopic(channelData.getKey()))) {
+					ChannelPayload payload = (ChannelPayload)objectMapper.readValue(message, ChannelPayload.class);
+					Integer srId = Integer.valueOf(MessageChannel.getSmartRoomIdFromTopic(channelData.getKey()));
+
+					if (this.smartRooms.containsKey(srId)) {
 						// Set received value
-						for (Sensor sensor : this.smartRooms.get(MessageChannel.getSmartRoomIdFromTopic(channelData.getKey())).getSensors()) {
+						for (Sensor sensor : this.smartRooms.get(srId).getSensors()) {
 							if (sensor.getId() == payload.getId()) sensor.setValue(payload.getValue());
 							
 						}
@@ -138,10 +141,11 @@ public class Monitor extends Thread {
 					
 				for (String message : channelData.getValue()) {
 					ChannelPayload payload = objectMapper.readValue(message, ChannelPayload.class);
+					Integer srId = Integer.valueOf(MessageChannel.getSmartRoomIdFromTopic(channelData.getKey()));
 					
-					if (this.smartRooms.containsKey(MessageChannel.getSmartRoomIdFromTopic(channelData.getKey()))) {
+					if (this.smartRooms.containsKey(srId)) {
 						// Set received value
-						for (Actuator act : this.smartRooms.get(MessageChannel.getSmartRoomIdFromTopic(channelData.getKey())).getActuators()) {
+						for (Actuator act : this.smartRooms.get(srId).getActuators()) {
 							if (act.getId() == payload.getId()) act.setPower((int)payload.getValue());
 							
 						}
