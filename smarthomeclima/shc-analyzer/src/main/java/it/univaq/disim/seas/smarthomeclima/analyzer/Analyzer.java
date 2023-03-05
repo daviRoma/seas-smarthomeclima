@@ -105,8 +105,10 @@ public class Analyzer {
 							// reaction
 							if (sensor.getValue() == 1) {
 								// Remove the temp sensor from the update map
-								if (config.getSensors().get(SensorType.TEMPERATURE).getValue() < (config.getPolicy().getOptimalTemperature() - Policy.OPTIMAL_MARGIN)) {
-									smartRoomsData.get(config.getSmartRoom().getId()).put(SensorType.MOTION, Configurator.ON);
+								if (config.getSensors().containsKey(SensorType.TEMPERATURE)) {
+									if (config.getSensors().get(SensorType.TEMPERATURE).getValue() != 0L && config.getSensors().get(SensorType.TEMPERATURE).getValue() < (config.getPolicy().getOptimalTemperature() - Policy.OPTIMAL_MARGIN)) {
+										smartRoomsData.get(config.getSmartRoom().getId()).put(SensorType.MOTION, Configurator.ON);
+									}									
 								}
 								
 							} else {
@@ -144,7 +146,7 @@ public class Analyzer {
 				actualConfigurations.put(sm.getId(), config);
 			}
 			// set sensors
-			if (sm.getSensors().isEmpty()) {
+			if (!sm.getSensors().isEmpty()) {
 				for (Sensor sensor : sm.getSensors()) {
 					this.actualConfigurations.get(sm.getId()).getSensors().put(sensor.getType(), sensor);
 				}				
@@ -164,13 +166,43 @@ public class Analyzer {
 			// Set active policy
 			Policy currentPolicy = this.actualConfigurations.get(sm.getId()).getPolicy();
 			if (currentPolicy == null || (currentPolicy != null && (currentPolicy.getStartHour().getHour() > this.clock.getHour() || this.clock.getHour() > currentPolicy.getEndHour().getHour()))) {
-				for (Policy policy : this.actualConfigurations.get(sm.getId()).getPolicyGroup().getPolicies()) {
-					if (policy.getStartHour().getHour() <= this.clock.getHour() && this.clock.getHour()< policy.getEndHour().getHour()) {
-						policy.setActive(true);
-						this.actualConfigurations.get(sm.getId()).setPolicy(policy);
-					}
-				}				
+				this.actualConfigurations.get(sm.getId()).setPolicy(
+					this.setActivePolicyByDate(this.actualConfigurations.get(sm.getId()).getPolicyGroup().getPolicies())
+				);			
 			}
 		}
+	}
+	
+	/**
+	 * Set current policy by current datetime
+	 * @param policies
+	 */
+	private Policy setActivePolicyByDate(List<Policy> policies) {
+		for (Policy p : policies) {
+			// es. 1:01 == 1:45 && 1:01 <= 1:45 && 2:00 > 1:45
+			if (
+				(
+					p.getStartHour().getHour() == LocalDateTime.now().getHour() && 
+					p.getStartHour().getMinute() <= LocalDateTime.now().getMinute() && 
+					p.getEndHour().getHour() > LocalDateTime.now().getHour() 
+				) ||
+				(
+					// es. 1:01 < 2:00 && 2:00 == 2:00 && 2:00 == 2:00
+					p.getStartHour().getHour() < LocalDateTime.now().getHour() && 
+					p.getEndHour().getHour() == LocalDateTime.now().getHour() &&
+					p.getEndHour().getMinute() == LocalDateTime.now().getMinute()				
+				) ||
+				(
+					p.getStartHour().getHour() == 23 && 
+					this.clock.getHour() == 23 && 
+					this.clock.getMinute() > 1 
+				)
+				
+			) {
+				p.setActive(true);
+				return p;
+			}
+		}
+		return null;
 	}
 }

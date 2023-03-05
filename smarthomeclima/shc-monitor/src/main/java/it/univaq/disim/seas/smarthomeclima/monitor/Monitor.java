@@ -3,6 +3,7 @@ package it.univaq.disim.seas.smarthomeclima.monitor;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +20,9 @@ import it.univaq.disim.seas.smarthomeclima.knowledgebase.business.SmartRoomServi
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.business.exception.BusinessException;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.MessageChannel;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.SmartRoom;
+import it.univaq.disim.seas.smarthomeclima.knowledgebase.model.Channel;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.model.ChannelPayload;
+import it.univaq.disim.seas.smarthomeclima.knowledgebase.model.ChannelType;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.Actuator;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.Sensor;
 
@@ -35,10 +38,10 @@ public class Monitor extends Thread {
 	private SmartRoomService smartRoomService;
 	
 	@Autowired
-    private MqttBroker brokerSensors;
+    private MqttBroker broker;
 	
 	@Autowired
-    private MqttBroker brokerActuators;
+	private ObjectMapper objectMapper;
     
 	private boolean isStarted = true;
     private LocalDateTime clock;
@@ -66,23 +69,38 @@ public class Monitor extends Thread {
     	try {    		
     		for (SmartRoom sm : this.smartRoomService.findAll() ){
     			this.smartRooms.put(sm.getId(), sm);
+    			
+    			// Subscribe to channels
+    			for (Sensor sns : sm.getSensors()) {
+    		    	this.broker.subscribe(
+    		    		ChannelType.SENSOR, 
+    		    		MessageChannel.SENSOR_CHANNEL
+    		    			.replace("{srId}", Integer.toString(sm.getId()))
+    		    			.replace("{snsId}", Integer.toString(sns.getId()))
+    		    	);
+    			}
+    			for (Actuator act : sm.getActuators()) {
+    		    	this.broker.subscribe(
+    		    		ChannelType.ACTUATOR, 
+    		    		MessageChannel.ACTUATOR_CHANNEL
+    		    			.replace("{srId}", Integer.toString(sm.getId()))
+    		    			.replace("{actId}", Integer.toString(act.getId()))
+    		    	);
+    			}
     		}
     	} catch (BusinessException e) {
-    		LOGGER.error("[Monitor]::[run] --- " + e.getMessage());
+    		LOGGER.error("[Monitor]::[run]::[Error] --- " + e.getMessage());
     		e.printStackTrace();
     	}
     	
-    	// Subscribe to channels
-    	this.brokerSensors.subscribe(MessageChannel.SENSOR_CHANNEL);
-    	this.brokerActuators.subscribe(MessageChannel.ACTUATOR_CHANNEL);
 
         while (this.isStarted) {
         	LOGGER.info("[Monitor]::[run] --- Clock: " + this.clock.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        	LOGGER.info("[Monitor]::[run] --- New Messages: " + this.brokerSensors.getMessages().size());
+        	LOGGER.info("[Monitor]::[run] --- New Messages: " + this.broker.getMessages().size());
 
         	try {
-				if (!this.brokerSensors.getMessages().isEmpty()){
-					this.getSensorsData();
+				if (!this.broker.getMessages().isEmpty()){
+					this.processData();
 				} else {
 					Thread.sleep(30000);
 				}
@@ -105,25 +123,50 @@ public class Monitor extends Thread {
 	    	LOGGER.info("[Monitor]::[stopped]");
 	    }
 	}
-    
+
+    /**
+     * Process data.
+     * @throws BusinessException 
+     */
+	private void processData() throws BusinessException {
+		LOGGER.info("[Monitor]::[processData]");
+		
+		LocalDateTime clockTemp = this.clock;
+
+		// get data
+		this.getSensorsData();
+		this.getActuatorsData();
+		
+    	// clear messages
+    	this.broker.clear();		
+        
+		this.analyzer.analyzeSensorsValue(this.smartRooms, clockTemp);
+		
+		this.clock.plusMinutes(30);
+	}
+	
     /**
      * Get all sensors data.
      * @throws BusinessException 
      */
 	private void getSensorsData() throws BusinessException {
-		LocalDateTime clockTemp = this.clock;
+		LOGGER.info("[Monitor]::[getSensorsData] --- Retrieving...");
 		
-		try { 
-			ObjectMapper objectMapper = new ObjectMapper();
+		try {
+			List<Channel> sensorChannelData = (List<Channel>)this.broker.getChannels().get(ChannelType.SENSOR);
+			
+			Iterator<Channel> it = sensorChannelData.iterator();
 
 			// build sensor map for each room
-			for (Map.Entry<String, List<String>> channelData : this.brokerSensors.getChannelData().entrySet()) {
+
+			while (it.hasNext()) {
+				Channel channel = it.next();
 				
-				if (channelData.getValue().isEmpty()) continue;
+				if (channel.getMessages().isEmpty()) continue;
 				
-				for (String message : channelData.getValue()) {
+				for (String message : channel.getMessages()) {
 					ChannelPayload payload = (ChannelPayload)objectMapper.readValue(message, ChannelPayload.class);
-					Integer srId = Integer.valueOf(MessageChannel.getSmartRoomIdFromTopic(channelData.getKey()));
+					Integer srId = Integer.valueOf(MessageChannel.getSmartRoomIdFromTopic(channel.getTopic()));
 
 					if (this.smartRooms.containsKey(srId)) {
 						// Set received value
@@ -133,38 +176,72 @@ public class Monitor extends Thread {
 						}
 					}					
 				}
+				it.remove();
 			}
 			
+		} catch (Exception e) {
+			LOGGER.error("[Monitor]::[getSensorsData] --- " + e.getMessage());
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+     * Get all actuators data.
+     * @throws BusinessException 
+     */
+	private void getActuatorsData() throws BusinessException {
+		LOGGER.info("[Monitor]::[getActuatorsData] --- Retrieving...");		
+
+		try {			
+			List<Channel> actuatorChannelData = (List<Channel>)this.broker.getChannels().get(ChannelType.ACTUATOR);
+			
+			Iterator<Channel> it = actuatorChannelData.iterator();
+						
 			// build actuator map for each room
-			for (Map.Entry<String, List<String>> channelData : this.brokerActuators.getChannelData().entrySet()) {
-				if (channelData.getValue().isEmpty()) continue;
-					
-				for (String message : channelData.getValue()) {
+			while (it.hasNext()) {
+				Channel channel = it.next();
+				
+				if (channel.getMessages().isEmpty()) continue;
+									
+				for (String message : channel.getMessages()) {
 					ChannelPayload payload = objectMapper.readValue(message, ChannelPayload.class);
-					Integer srId = Integer.valueOf(MessageChannel.getSmartRoomIdFromTopic(channelData.getKey()));
+					Integer srId = Integer.valueOf(MessageChannel.getSmartRoomIdFromTopic(channel.getTopic()));
 					
 					if (this.smartRooms.containsKey(srId)) {
 						// Set received value
 						for (Actuator act : this.smartRooms.get(srId).getActuators()) {
-							if (act.getId() == payload.getId()) act.setPower((int)payload.getValue());
+							if (act.getId() == payload.getId()) {
+								if ((int)payload.getValue() == 0) {
+									act.setActive(false);									
+								} else {
+									act.setActive(true);
+								}
+								act.setPower((int)payload.getValue());
+							}
 							
 						}
 					}					
-				}					
+				}	
+				it.remove();
+			}
+			
+			for (Integer srId : this.smartRooms.keySet()) {
+				for (Actuator act : this.smartRooms.get(srId).getActuators()) {
+					LOGGER.info("[Monitor]::[getActuatorsData] --- Publish");	
+					// publish on mqtt channel
+					this.broker.publish(
+						ChannelType.ACTUATOR_MONITOR,
+						MessageChannel.MONITOR_ACTUATOR_CHANNEL
+							.replace("{srId}", Integer.toString(srId))
+							.replace("{actId}", String.valueOf(act.getId())),  
+							this.objectMapper.writeValueAsString(new ChannelPayload(act.getId(), act.getPower()))
+					);	
+				}
 			}
 		} catch (Exception e) {
+			LOGGER.error("[Monitor]::[getActuatorsData] --- " + e.getMessage());
 			e.printStackTrace();
 		}
-    	
-  
-    	// clear messages
-    	this.brokerSensors.clear();
-    	this.brokerActuators.clear();		
-        
-		this.analyzer.analyzeSensorsValue(this.smartRooms, clockTemp);
-		
-		this.clock.plusMinutes(30);
-		
 	}
 	
 }

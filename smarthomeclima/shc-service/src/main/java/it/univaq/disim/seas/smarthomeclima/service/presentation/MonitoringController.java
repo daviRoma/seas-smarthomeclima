@@ -1,6 +1,5 @@
 package it.univaq.disim.seas.smarthomeclima.service.presentation;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,11 +31,10 @@ public class MonitoringController {
 	public Map<String, String> startMonitoring() throws BusinessException {
 		LOGGER.info("[MonitoringController]::[startMonitoring] --- Starting monitoring");;
 		
-		this.simulator.start();
-//		this.monitor.setClock(LocalDateTime.of(2023, 2, 1, 1, 0));
 		this.monitor.start();
+		this.simulator.start();
 		
-		return new HashMap<String, String>(){{ put("Message", "OK");}};
+		return new HashMap<String, String>(){{ put("Message", "Started.");}};
 	}
 	
 	@GetMapping("/stop")

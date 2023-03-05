@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.univaq.disim.seas.smarthomeclima.broker.MqttBroker;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.MessageChannel;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.model.ChannelPayload;
+import it.univaq.disim.seas.smarthomeclima.knowledgebase.model.ChannelType;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.model.Execution;
 
 @Component
@@ -23,10 +24,7 @@ public class Executor {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Executor.class);
 
 	@Autowired
-	private MqttBroker brokerActators;
-	
-	@Autowired
-	private MqttBroker brokerExecutor;
+	private MqttBroker broker;
 
 	@Autowired
 	private ObjectMapper objectMapper;
@@ -44,9 +42,11 @@ public class Executor {
 			for (Execution exec : actions.get(key)) {
 
 				try {
-					String payload = this.objectMapper.writeValueAsString(new ChannelPayload(exec.getActuatorId(), exec.getAction()));
+					String payload = this.objectMapper.writeValueAsString(new ChannelPayload(exec.getActuatorId(), exec.getValue()));
+					LOGGER.info("[Executor]::[executor] --- Payload -- " + exec.getActuatorId() + ", " + exec.getAction() + ", " + exec.getValue());
 					
-					this.brokerExecutor.publish(
+					this.broker.publish(
+						ChannelType.EXECUTOR_MONITOR,
 						MessageChannel.MONITOR_EXECUTOR_CHANNEL
 							.replace("{srId}", Integer.toString(key))
 							.replace("{actId}", Integer.toString(exec.getActuatorId())),
@@ -54,7 +54,8 @@ public class Executor {
 						);
 					
 					// actuators are listening
-					this.brokerActators.publish(
+					this.broker.publish(
+						ChannelType.ACTUATOR,
 						MessageChannel.ACTUATOR_CHANNEL
 							.replace("{srId}", Integer.toString(key))
 							.replace("{actId}", Integer.toString(exec.getActuatorId())),

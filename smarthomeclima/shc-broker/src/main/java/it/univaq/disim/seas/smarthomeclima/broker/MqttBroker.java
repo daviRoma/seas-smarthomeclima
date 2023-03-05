@@ -14,19 +14,43 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import it.univaq.disim.seas.smarthomeclima.knowledgebase.model.Channel;
+import it.univaq.disim.seas.smarthomeclima.knowledgebase.model.ChannelType;
+
 @Component
 public class MqttBroker implements MqttCallback {
 
 	private static Logger LOGGER = LoggerFactory.getLogger(MqttBroker.class);
 
-	MqttClient client;
+	private MqttClient client;
+	
 	List<String> messages = new ArrayList<String>();
 	List<String> topics = new ArrayList<String>();
 	
-	Map<String, List<String>> channelData = new HashMap<String, List<String>>();
+	Map<ChannelType, List<Channel>> channels = new HashMap<ChannelType, List<Channel>>();
 
 	public MqttBroker() {}
 
+	public void deliveryComplete(IMqttDeliveryToken arg0) {
+		LOGGER.info("[MqttBroker]::The delivery has been complete. The delivery token is " + arg0.getMessageId());
+	}
+
+	public void messageArrived(String topic, MqttMessage message) throws Exception {
+		this.messages.add(message.toString());
+		this.topics.add(topic);
+	}
+	
+	public void clear(){
+		this.messages.clear();
+		this.topics.clear();
+		
+		for (ChannelType type : this.channels.keySet()) {
+			for (Channel ch : this.channels.get(type)) {
+				ch.getMessages().clear();
+			}
+		}
+	}
+	
 	public List<String> getMessages() {
 		return messages;
 	}
@@ -46,65 +70,87 @@ public class MqttBroker implements MqttCallback {
 	public void connectionLost(Throwable arg0) {
 		LOGGER.info("[MqttBroker]::Server connection lost...");
 	}
-
-	public void deliveryComplete(IMqttDeliveryToken arg0) {
-		LOGGER.info("[MqttBroker]::The delivery has been complete. The delivery token is ");
-	}
-
-	public void messageArrived(String topic, MqttMessage message) throws Exception {
-		this.messages.add(message.toString());
-		this.topics.add(topic);
-	}
 	
-	public void clear(){
-		this.messages.clear();
-		this.topics.clear();
-	}
-	
-	public void setChannelData(String channel) {
-		this.channelData.put(channel, new ArrayList<String>());
+	public void setChannels(ChannelType type) {
+		this.channels.put(type, new ArrayList<Channel>());
 	}
 
-	public Map<String, List<String>> getChannelData() {
-		return this.channelData; 
+	public Map<ChannelType, List<Channel>> getChannels() {
+		return this.channels; 
 	}
 	
-	public void publish(String channel, String mess) {
-		MemoryPersistence memoryPersistence = new MemoryPersistence();
+	public List<Channel> getChannelsEntry(ChannelType type) {
+		return this.channels.get(type); 
+	}
+	
+	public void setSingleChannel(ChannelType type, String topic) {
+		// Set channel data
+		if (this.channels.containsKey(type)) {
+			boolean flag = false;
+			for (Channel ch : this.channels.get(type)) {
+				if (ch.getTopic().equals(topic)) flag = true;
+			}
+			if (!flag) this.channels.get(type).add(new Channel(topic));
+		} else {
+			this.channels.put(type, new ArrayList<Channel>());
+			this.channels.get(type).add(new Channel(topic));			
+		}
+	}
+	
+	public void publish(ChannelType type, String topic, String mess) {
 		MqttMessage message = new MqttMessage();
 		
-		if (this.channelData.containsKey(channel)) this.channelData.get(channel).add(mess);
-		else this.channelData.put(channel, new ArrayList<String>() {{ add(mess); }});
+		// Set channel data
+		if (this.channels.containsKey(type)) {
+			for (Channel ch : this.channels.get(type)) {
+				if (ch.getTopic().equals(topic)) {
+					ch.getMessages().add(mess);
+				}
+			}
+		} else {
+			this.channels.put(type, new ArrayList<Channel>());
+			this.channels.get(type).add(new Channel(topic, mess));			
+		}
 
 		try {
-			LOGGER.info("[MqttBroker]::[publish]::Send message to " + channel);
-			
-			client = new MqttClient("ws://localhost:8081", MqttClient.generateClientId(), memoryPersistence);
-			client.connect();
+			LOGGER.info("[MqttBroker]::[publish]::Send message to " + topic);
+			if (this.client == null || !this.client.isConnected()) this.clientConnection();
 			
 			message.setPayload(mess.getBytes());
 			message.setQos(2);
 			this.messages.add(message.toString());
 			
-			client.publish(channel, message);
-			client.disconnect();
+			this.client.publish(topic, message);
+			this.client.disconnect();
 		} catch (MqttException e) {
 			LOGGER.error("[MqttBroker]::[publish]::" + e.getMessage());
 			e.printStackTrace();
 		}
 	}
 
-	public void subscribe(String channel) {
-		this.setChannelData(channel);
+	public void subscribe(ChannelType type, String topic) {
+		// Set channel
+		this.setSingleChannel(type, topic);
 		
 		try {
-			MemoryPersistence memoryPersistence = new MemoryPersistence();
-			client = new MqttClient("ws://localhost:8081", MqttClient.generateClientId(), memoryPersistence);
-			client.setCallback(this);
+			if (this.client == null || !this.client.isConnected()) this.clientConnection();
 			
-			client.connect();
-			client.subscribe(channel);
+			this.client.subscribe(topic);
 		} catch (MqttException e) {
+			LOGGER.error("[MqttBroker]::[subscribe]::" + e.getMessage());
+			e.printStackTrace();
+		}
+	}
+	
+	public void clientConnection() {
+		MemoryPersistence memoryPersistence = new MemoryPersistence();
+		
+		try {
+			this.client = new MqttClient("ws://localhost:8081", MqttClient.generateClientId(), memoryPersistence);
+			this.client.setCallback(this);
+			this.client.connect();								
+		} catch (MqttException e) {
+			LOGGER.error("[MqttBroker]::[clientConnection]::" + e.getMessage());
 			e.printStackTrace();
 		}
 	}

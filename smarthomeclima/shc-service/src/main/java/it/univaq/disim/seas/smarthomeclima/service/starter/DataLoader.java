@@ -250,6 +250,11 @@ public class DataLoader implements CommandLineRunner {
 					p.getStartHour().getHour() < LocalDateTime.now().getHour() && 
 					p.getEndHour().getHour() == LocalDateTime.now().getHour() &&
 					p.getEndHour().getMinute() == LocalDateTime.now().getMinute()				
+				)||
+				(
+					p.getStartHour().getHour() == 23 && 
+					LocalDateTime.now().getHour() == 23 && 
+					LocalDateTime.now().getMinute() > 1 
 				)
 			) {
 				p.setActive(true);

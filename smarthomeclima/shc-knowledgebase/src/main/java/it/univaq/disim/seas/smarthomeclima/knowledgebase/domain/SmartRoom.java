@@ -43,9 +43,7 @@ public class SmartRoom {
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "smartRoom")
 	@JsonManagedReference
 	private List<Actuator> actuators;
-	
-	public SmartRoom() {}
-	
+		
 	public void setSensor(Sensor sensor) {
 		if (this.sensors.isEmpty()) this.sensors = new ArrayList<Sensor>();
 		this.sensors.add(sensor);
