@@ -8,8 +8,6 @@ import { Store } from '@ngrx/store';
 import * as smartRoomSelectors from 'src/app/features/smart-room/store/selectors/smart-room.selectors';
 import { AppState } from 'src/app/state/app.state';
 
-import * as monitorSelector from 'src/app/store/monitor.selectors';
-
 import { SmartRoomLoadOneAction } from 'src/app/features/smart-room/store/actions/smart-room.actions';
 
 import { EditSmartRoomComponent } from 'src/app/features/smart-room/components/dialogs/edit-smart-room/edit-smart-room.component';
@@ -34,7 +32,7 @@ export class DetailComponent implements OnInit, OnDestroy {
   
   public temperatureValues: number[];
   public motionValues: number[];
-  public powerValues: number[];
+  public powerValues: any[];
   
   public editSmartRoomDialogRef: any;
   public deleteSmartRoomDialogRef: any;
@@ -131,19 +129,31 @@ export class DetailComponent implements OnInit, OnDestroy {
 
         if (result) {
           this.smartRoom = { ...result };
-          let temperatureSensor = this.smartRoom.sensors?.find(el => el.type == 'TEMPERATURE');
-          let motionSensor = this.smartRoom.sensors?.find(el => el.type == 'MOTION');
-          let powerActuator = this.smartRoom.actuators?.find(el => el.power);
-
-          this.temperatureValues = temperatureSensor?.values ? [...temperatureSensor.values] : [];
-          this.motionValues = motionSensor?.values ? [...motionSensor.values] : [];
-          this.powerValues = powerActuator?.values ? [...powerActuator.values] : [];
-          // this.loadMonitorData();
+          this.setChartsValues();
           this.isLoading = false;
         } else {
           this.store.dispatch(SmartRoomLoadOneAction({ id: this.params.smartRoomId, dispatch: true } as SmartRoomRequest));
         }
     });
+  }
+
+  private setChartsValues(): void {
+    let temperatureSensor = this.smartRoom.sensors?.find(el => el.type == 'TEMPERATURE');
+    let motionSensor = this.smartRoom.sensors?.find(el => el.type == 'MOTION');
+    let conditionerActuator = this.smartRoom.actuators?.find(el => el.type == 'CONDITIONER');
+    let radiatorActuator = this.smartRoom.actuators?.find(el => el.type == 'RADIATOR');
+
+    this.temperatureValues = temperatureSensor?.values ? [...temperatureSensor.values] : [];
+
+    this.motionValues = motionSensor?.values ? [...motionSensor.values] : [0];
+
+    if (this.smartRoom.policyGroups && this.smartRoom.policyGroups[0].season == 'WINTER') {
+      if (this.powerValues && radiatorActuator?.values && this.powerValues.length == radiatorActuator?.values.length) this.powerValues = [...this.powerValues, null];
+      else this.powerValues = radiatorActuator?.values ? [...radiatorActuator.values] : [0];
+    } else {
+      if (this.powerValues && conditionerActuator?.values && this.powerValues.length == conditionerActuator?.values.length) this.powerValues = [...this.powerValues, 0];
+      else this.powerValues = conditionerActuator?.values ? [...conditionerActuator.values] : [0];
+    }
   }
 
 }

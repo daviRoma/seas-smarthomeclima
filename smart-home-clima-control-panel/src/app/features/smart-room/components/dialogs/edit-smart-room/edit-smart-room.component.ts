@@ -54,7 +54,7 @@ export class EditSmartRoomComponent {
     const payload = this.smartRoomForm.value as SmartRoom;
 
     this.dialogConfig.operation === 'new' ?
-      this.store.dispatch(SmartRoomNewAction({payload})) :
+      this.store.dispatch(SmartRoomNewAction({payload: { ...payload }})) :
       this.store.dispatch(SmartRoomUpdateAction({payload: { ...payload, id: this.smartRoom.id }}));
   }
 

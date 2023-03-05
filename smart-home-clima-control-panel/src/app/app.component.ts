@@ -101,11 +101,13 @@ export class AppComponent {
   }
   
   private selectSmartRooms(): void {
+    this.logger.info('[AppComponent]', '[selectSmartRooms]', 'selecting...');
+    
     this.store
       .select(smartRoomSelectors.selectAllSmartRoom)
       .pipe(takeUntil(this.destroy))
       .subscribe((response: SmartRoom[]) => {
-        this.logger.info('[AppComponent]', '[selectSmartRooms]', 'selecting...');
+        this.logger.info('[AppComponent]', '[selectSmartRooms]', 'response', response);
         if (response.length) {
           this._smartRooms = JSON.parse(JSON.stringify(response)) as SmartRoom[];
 
@@ -117,7 +119,7 @@ export class AppComponent {
               });
               // Subscribe to actuator topics
               smartRoom.actuators?.forEach(actuator => {
-                this.subscribeToActuatorTopic(`monitor/smartroom/${smartRoom.id}/actuator/${actuator.id}`);
+                this.subscribeToActuatorTopic(`smartroom/${smartRoom.id}/monitor/actuator/${actuator.id}`);
               })
             });
             this.subscribed = true;
@@ -145,7 +147,7 @@ export class AppComponent {
           let values = ac.messages.map(msg => msg.value);
           smartRoom.actuators.find(act => act.id == ac.deviceId)!.values = values;
           smartRoom.actuators.find(act => act.id == ac.deviceId)!.power = values[values.length - 1];
-          smartRoom.actuators.find(act => act.id == ac.deviceId)!.active = values[values.length - 1] > 0;
+          smartRoom.actuators.find(act => act.id == ac.deviceId)!.active = values && values[values.length - 1] > 0;
         }
       });
       return { ...smartRoom };

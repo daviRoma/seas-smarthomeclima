@@ -6,10 +6,10 @@ export const chartDatasetsTemperature = {
     data: [] = [],
     label: 'Temperature',
     borderColor: '#c94939',
-    tension: 0.5,
+    tension: 0.3,
     pointStyle: 'circle',
-    pointRadius: 6,
-    pointHoverRadius: 10
+    pointRadius: 5,
+    pointHoverRadius: 8
 };
 
 export const chartDatasetsMotion = {
@@ -18,8 +18,10 @@ export const chartDatasetsMotion = {
     borderColor: '#2b84e9',
     tension: 0.5,
     pointStyle: 'circle',
-    pointRadius: 6,
-    pointHoverRadius: 10
+    pointRadius: 5,
+    pointHoverRadius: 8,
+    stepped: true,
+    spanGaps: true
 };
 
 export const chartDatasetsPower = {
@@ -27,35 +29,40 @@ export const chartDatasetsPower = {
     label: 'Power',
     borderColor: '#268139',
     backgroundColor: '#56e674',
+    pointBackgroundColor: '#56e674',
+    pointBorderColor: '#268139',
     tension: 0.5,
+    fill: false,
     pointStyle: 'circle',
-    pointRadius: 6,
-    pointHoverRadius: 10
+    pointRadius: 5,
+    pointHoverRadius: 8,
+    stepped: true,
+    spanGaps: true
 };
 
 export const baseLineChartLabels = [
-    '00-01',
-    '01-02',
-    '02-03',
-    '03-04',
-    '04-05',
-    '05-06',
-    '06-07',
-    '07-08',
-    '08-09',
-    '09-10',
-    '10-11',
-    '11-12',
-    '12-13',
-    '13-14',
-    '14-15',
-    '15-16',
-    '16-17',
-    '17-18',
-    '18-19',
-    '19-20',
-    '20-21',
-    '21-22',
-    '22-23',
-    '23-00'
+    '00:00',
+    '01:00',
+    '02:00',
+    '03:00',
+    '04:00',
+    '05:00',
+    '06:00',
+    '07:00',
+    '08:00',
+    '09:00',
+    '10:00',
+    '11:00',
+    '12:00',
+    '13:00',
+    '14:00',
+    '15:00',
+    '16:00',
+    '17:00',
+    '18:00',
+    '19:00',
+    '20:00',
+    '21:00',
+    '22:00',
+    '23:00'
 ];

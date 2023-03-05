@@ -7,7 +7,7 @@ import { SmartRoom } from 'src/app/models/smart-room.model';
 import { PolicyGroup } from 'src/app/models/policy-group.model';
 import { Policy } from 'src/app/models/policy.model';
 
-import { ChartConfiguration, ChartOptions, ChartType } from "chart.js";
+import { ChartConfiguration, ChartOptions, ChartType, Chart } from "chart.js";
 
 import { EditPolicyGroupDialogComponent } from 'src/app/features/policy-group/components/dialogs/edit-policy-group-dialog/edit-policy-group-dialog.component';
 import { EditPolicyDialogComponent } from 'src/app/features/policy/components/dialogs/edit-policy-dialog/edit-policy-dialog.component';
@@ -81,8 +81,26 @@ export class SmartRoomDetailComponent implements OnInit, OnDestroy {
     labels: baseLineChartLabels,
     datasets: [chartDatasetsPower]
   };
-  public lineChartOptions: ChartOptions<'line'> = {
-    responsive: true
+
+  public powerLineChartOptions: ChartOptions<'line'> = {
+    responsive: true,
+    scales: {
+      y: {
+        position: 'left',
+        min: 0,
+        max: 5
+      },
+    }
+  };
+  public SensorLineChartOptions: ChartOptions<'line'> = {
+    responsive: true,
+    scales: {
+      y: {
+        position: 'left',
+        min: 0,
+        suggestedMax: 30
+      },
+    }
   };
   public lineChartLegend = true;
 
@@ -101,6 +119,9 @@ export class SmartRoomDetailComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.policyGroup = this.smartRoom.policyGroups ? this.smartRoom.policyGroups.filter(pg => pg.active)[0] : new PolicyGroup();
     this.policy = this.policyGroup && this.policyGroup.policies ? this.policyGroup.policies.filter(p => p.active)[0] : new Policy();
+
+    this.lineChartData.labels = this.sortChartLabels();
+    this.powerLineChartData.labels = this.sortChartLabels();
   }
 
   public openEditPolicyGroup(): void {
@@ -173,6 +194,15 @@ export class SmartRoomDetailComponent implements OnInit, OnDestroy {
         }
       })
     );
+  }
+
+  private sortChartLabels(): String[] {
+    let index;
+    baseLineChartLabels.forEach((l, i) => {
+      let hour = Number(l.split(':')[0]);
+      if (hour == new Date(this.policy.startHour).getHours()) index = i;
+    });
+    return [ ...baseLineChartLabels.slice(index, baseLineChartLabels.length + 1), ...baseLineChartLabels.slice(0, index)];
   }
 
   ngOnDestroy(): void {
