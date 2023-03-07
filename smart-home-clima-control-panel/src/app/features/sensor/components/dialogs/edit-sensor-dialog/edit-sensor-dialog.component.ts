@@ -67,6 +67,8 @@ export class EditSensorDialogComponent implements OnInit {
     if (payloads.new.sensors) this.store.dispatch(SensorNewAction({ payload: payloads.new }));
     if (payloads.update.sensors) this.store.dispatch(SensorUpdateAction({ payload: payloads.update }));
     if (payloads.delete.sensors) this.store.dispatch(SensorDeleteAction({ payload: payloads.delete }));
+
+    this.dialogRef.close({ result: 'close_after_update'});
   }
 
   closeDialog(): void {

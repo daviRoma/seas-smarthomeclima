@@ -143,16 +143,16 @@ export class DetailComponent implements OnInit, OnDestroy {
     let conditionerActuator = this.smartRoom.actuators?.find(el => el.type == 'CONDITIONER');
     let radiatorActuator = this.smartRoom.actuators?.find(el => el.type == 'RADIATOR');
 
-    this.temperatureValues = temperatureSensor?.values ? [...temperatureSensor.values] : [];
+    this.temperatureValues = temperatureSensor?.values ? [ ...temperatureSensor.values ] : [];
 
-    this.motionValues = motionSensor?.values ? [...motionSensor.values] : [0];
+    this.motionValues = motionSensor?.values ? [ ...motionSensor.values ] : [];
 
     if (this.smartRoom.policyGroups && this.smartRoom.policyGroups[0].season == 'WINTER') {
-      if (this.powerValues && radiatorActuator?.values && this.powerValues.length == radiatorActuator?.values.length) this.powerValues = [...this.powerValues, null];
-      else this.powerValues = radiatorActuator?.values ? [...radiatorActuator.values] : [0];
+      if (this.powerValues && radiatorActuator?.values && this.powerValues.length == radiatorActuator?.values.length) this.powerValues = [ ...this.powerValues ];
+      else this.powerValues = radiatorActuator?.values ? [ ...radiatorActuator.values ] : [];
     } else {
-      if (this.powerValues && conditionerActuator?.values && this.powerValues.length == conditionerActuator?.values.length) this.powerValues = [...this.powerValues, 0];
-      else this.powerValues = conditionerActuator?.values ? [...conditionerActuator.values] : [0];
+      if (this.powerValues && conditionerActuator?.values && this.powerValues.length == conditionerActuator?.values.length) this.powerValues = [ ...this.powerValues ];
+      else this.powerValues = conditionerActuator?.values ? [ ...conditionerActuator.values ] : [];
     }
   }
 

@@ -26,6 +26,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { DeleteSmartRoomComponent } from './components/dialogs/delete-smart-room/delete-smart-room.component';
 
@@ -59,7 +60,8 @@ import { NgChartsModule } from 'ng2-charts';
     MatInputModule,
     MatCheckboxModule,
     MatSelectModule,
-    MatButtonModule 
+    MatButtonModule,
+    MatProgressSpinnerModule
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   exports: [SmartRoomDetailComponent],

@@ -95,7 +95,7 @@ export class AppComponent {
       this.interval = setInterval(() => {
         this.updateSmartRoomsData();
         this.updateMonitorChannels();
-      }, 20000);
+      }, 10000);
       this.updating = true;
     }
   }

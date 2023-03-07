@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { select, Store } from '@ngrx/store';
 
 import { MatDialog } from '@angular/material/dialog';
 import { SmartRoom } from 'src/app/models/smart-room.model';
@@ -7,7 +8,7 @@ import { SmartRoom } from 'src/app/models/smart-room.model';
 import { PolicyGroup } from 'src/app/models/policy-group.model';
 import { Policy } from 'src/app/models/policy.model';
 
-import { ChartConfiguration, ChartOptions, ChartType, Chart } from "chart.js";
+import { ChartConfiguration, ChartOptions, ChartType } from "chart.js";
 
 import { EditPolicyGroupDialogComponent } from 'src/app/features/policy-group/components/dialogs/edit-policy-group-dialog/edit-policy-group-dialog.component';
 import { EditPolicyDialogComponent } from 'src/app/features/policy/components/dialogs/edit-policy-dialog/edit-policy-dialog.component';
@@ -17,11 +18,14 @@ import { EditActuatorDialogComponent } from 'src/app/features/actuator/component
 import { EditDialogConf } from 'src/app/config/dialog.config';
 
 import {
-  baseLineChartLabels,
   chartDatasetsTemperature,
   chartDatasetsMotion,
   chartDatasetsPower
 } from 'src/app/config/chart.config';
+
+import { SmartRoomLoadAction } from 'src/app/features/smart-room/store/actions/smart-room.actions';
+import { AppState } from 'src/app/state/app.state';
+
 
 @Component({
   selector: 'app-smart-room-detail',
@@ -68,17 +72,12 @@ export class SmartRoomDetailComponent implements OnInit, OnDestroy {
   public policyGroup!: PolicyGroup
   public policy!: Policy
 
-  public editPolicyGroupDialogRef: any;
-  public editPolicyDialogRef: any;
-  public editSensorDialogRef: any;
-  public editActuatorDialogRef: any;
+  public editDialogRef: any;
 
   public lineChartData: ChartConfiguration<'line'>['data'] = {
-    labels: baseLineChartLabels,
     datasets: [chartDatasetsTemperature, chartDatasetsMotion]
   };
   public powerLineChartData: ChartConfiguration<'line'>['data'] = {
-    labels: baseLineChartLabels,
     datasets: [chartDatasetsPower]
   };
 
@@ -90,6 +89,12 @@ export class SmartRoomDetailComponent implements OnInit, OnDestroy {
         min: 0,
         max: 5
       },
+      x: {
+        title: {
+          display: true,
+          text: 'Hours'
+        }
+      }
     }
   };
   public SensorLineChartOptions: ChartOptions<'line'> = {
@@ -100,17 +105,21 @@ export class SmartRoomDetailComponent implements OnInit, OnDestroy {
         min: 0,
         suggestedMax: 30
       },
+      x: {
+        title: {
+          display: true,
+          text: 'Hours'
+        }
+      }
     }
   };
   public lineChartLegend = true;
 
   constructor(
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    private store: Store<AppState>
   ) {
-    this.editPolicyGroupDialogRef = { ...EditDialogConf };
-    this.editPolicyDialogRef = { ...EditDialogConf };
-    this.editSensorDialogRef = { ...EditDialogConf };
-    this.editActuatorDialogRef = { ...EditDialogConf };
+    this.editDialogRef = { ...EditDialogConf };
 
     this._temperatureValues = [];
     this._motionValues = [];
@@ -120,93 +129,111 @@ export class SmartRoomDetailComponent implements OnInit, OnDestroy {
     this.policyGroup = this.smartRoom.policyGroups ? this.smartRoom.policyGroups.filter(pg => pg.active)[0] : new PolicyGroup();
     this.policy = this.policyGroup && this.policyGroup.policies ? this.policyGroup.policies.filter(p => p.active)[0] : new Policy();
 
-    this.lineChartData.labels = this.sortChartLabels();
-    this.powerLineChartData.labels = this.sortChartLabels();
+    this.lineChartData.labels = this.getChartLabels();
+    this.powerLineChartData.labels = this.getChartLabels();
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+    this.store.complete();
   }
 
   public openEditPolicyGroup(): void {
-    this.editPolicyGroupDialogRef.data.smartRoom = { ...this.smartRoom };
-    this.editPolicyGroupDialogRef.data.operation = 'edit';
-    this.editPolicyGroupDialogRef.data.title = 'Edit Policy Group';
+    this.editDialogRef.data.smartRoom = { ...this.smartRoom };
+    this.editDialogRef.data.operation = 'edit';
+    this.editDialogRef.data.title = 'Edit Policy Group';
 
     const updateDialogRef = this.dialog.open(
       EditPolicyGroupDialogComponent,
-      this.editPolicyGroupDialogRef
+      this.editDialogRef
     );
 
     this.subscription.add(
       updateDialogRef.afterClosed().subscribe((response) => {
         if (response.result === 'close_after_update') {
+          this.store.dispatch(SmartRoomLoadAction());
         }
       })
     );
   }
 
   public openEditPolicy(): void {
-    this.editPolicyDialogRef.data.smartRoom = { ...this.smartRoom };
-    this.editPolicyDialogRef.data.operation = 'edit';
-    this.editPolicyDialogRef.data.title = 'Edit Policies';
+    this.editDialogRef.data.smartRoom = { ...this.smartRoom };
+    this.editDialogRef.data.operation = 'edit';
+    this.editDialogRef.data.title = 'Edit Policies';
 
     const updateDialogRef = this.dialog.open(
       EditPolicyDialogComponent,
-      this.editPolicyDialogRef
+      this.editDialogRef
     );
 
     this.subscription.add(
       updateDialogRef.afterClosed().subscribe((response) => {
         if (response.result === 'close_after_update') {
+          this.store.dispatch(SmartRoomLoadAction());
         }
       })
     );
   }
 
   public openEditSensors(): void {
-    this.editSensorDialogRef.data.smartRoom = { ...this.smartRoom };
-    this.editSensorDialogRef.data.operation = 'edit';
-    this.editSensorDialogRef.data.title = 'Edit Sensors';
+    this.editDialogRef.data.smartRoom = { ...this.smartRoom };
+    this.editDialogRef.data.operation = 'edit';
+    this.editDialogRef.data.title = 'Edit Sensors';
 
     const updateDialogRef = this.dialog.open(
       EditSensorDialogComponent,
-      this.editSensorDialogRef
+      this.editDialogRef
     );
 
     this.subscription.add(
       updateDialogRef.afterClosed().subscribe((response) => {
         if (response.result === 'close_after_update') {
+          this.store.dispatch(SmartRoomLoadAction());
         }
       })
     );
   }
 
   public openEditActuators(): void {
-    this.editActuatorDialogRef.data.smartRoom = { ...this.smartRoom };
-    this.editActuatorDialogRef.data.operation = 'edit';
-    this.editActuatorDialogRef.data.title = 'Edit Actuators';
+    this.editDialogRef.data.smartRoom = { ...this.smartRoom };
+    this.editDialogRef.data.operation = 'edit';
+    this.editDialogRef.data.title = 'Edit Actuators';
 
     const updateDialogRef = this.dialog.open(
       EditActuatorDialogComponent,
-      this.editActuatorDialogRef
+      this.editDialogRef
     );
 
     this.subscription.add(
       updateDialogRef.afterClosed().subscribe((response) => {
         if (response.result === 'close_after_update') {
+          this.store.dispatch(SmartRoomLoadAction());
         }
       })
     );
   }
 
-  private sortChartLabels(): String[] {
-    let index;
-    baseLineChartLabels.forEach((l, i) => {
-      let hour = Number(l.split(':')[0]);
-      if (hour == new Date(this.policy.startHour).getHours()) index = i;
-    });
-    return [ ...baseLineChartLabels.slice(index, baseLineChartLabels.length + 1), ...baseLineChartLabels.slice(0, index)];
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+  private getChartLabels(): String[] {
+    let labels: String[] = [];
+    let hour = new Date(this.policy.startHour).getHours();
+    
+    if (hour + 5 > 23) {
+      let diff = (hour+5) - 24;
+      for (let h = hour; h < (hour + 5 - diff); h++) {
+        labels = [ ...labels, h + ":00", h + ":15", h + ":30", h + ":45"];
+      }
+      for (let h = 0; h < diff; h++) {
+        if (h < 10) labels = [ ...labels, "0" + h +":00", "0" + h +":15", "0" + h +":30", "0" + h +":45"];
+        else labels = [ ...labels, h + ":00", h + ":15", h + ":30", h + ":45"];
+      }
+    } else {
+      for (let h = hour; h < (hour+5); h++) {
+        if (h < 10) labels = [ ...labels, "0" + h +":00", "0" + h +":15", "0" + h +":30", "0" + h +":45"];
+        else labels = [ ...labels, h + ":00", h + ":15", h + ":30", h + ":45"];
+      }
+    }
+    return labels;
   }
   
 }

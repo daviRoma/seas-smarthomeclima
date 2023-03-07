@@ -68,6 +68,7 @@ export class SmartRoomListComponent implements OnInit, OnDestroy {
       .subscribe((response: SmartRoom[]) => {
         if (response.length) {
           this.smartRooms = response;
+          this.isLoading = false;
         } else {
           this.getSmartRooms();
         }
