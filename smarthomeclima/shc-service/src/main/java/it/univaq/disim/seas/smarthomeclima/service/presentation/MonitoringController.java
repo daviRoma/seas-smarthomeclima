@@ -34,7 +34,10 @@ public class MonitoringController {
 		this.monitor.start();
 		this.simulator.start();
 		
-		return new HashMap<String, String>(){{ put("Message", "Started.");}};
+		return new HashMap<String, String>(){
+			private static final long serialVersionUID = 1L;
+			{ put("Message", "Started."); }
+		};
 	}
 	
 	@GetMapping("/stop")

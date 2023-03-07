@@ -30,7 +30,6 @@ import it.univaq.disim.seas.smarthomeclima.knowledgebase.business.exception.Busi
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.Actuator;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.MessageChannel;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.Pianification;
-import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.RoomType;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.Sensor;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.SensorType;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.SmartRoom;
@@ -67,7 +66,7 @@ public class Simulator extends Thread {
 		LOGGER.info("[Simulator]::[run] --- Simulator started");
 
 		try {			
-			Thread.sleep(5000);
+			Thread.sleep(20000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -79,8 +78,6 @@ public class Simulator extends Thread {
 			e.printStackTrace();
 		}
 		
-		// subscribe to topic
-		this.broker.subscribe(ChannelType.EXECUTOR_MONITOR, MessageChannel.MONITOR_EXECUTOR_CHANNEL);
 		
 		for (SmartRoom sm : this.smartRooms) {
 			for (Sensor sns : sm.getSensors()) {
@@ -99,12 +96,21 @@ public class Simulator extends Thread {
 					break;
 				}
 			}
+			for (Actuator act : sm.getActuators()) {
+				// subscribe to topic
+				this.broker.subscribe(
+					ChannelType.EXECUTOR_MONITOR, 
+					MessageChannel.MONITOR_EXECUTOR_CHANNEL
+					.replace("{srId}", Integer.toString(sm.getId()))
+					.replace("{actId}", String.valueOf(act.getId()))
+				);
+			}
 		}
 		
 		while(this.isStarted) {
 			try {
 				this.simulation();				
-				Thread.sleep(60000);
+				Thread.sleep(30000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			    Thread.currentThread().interrupt();  //set the flag back to true
@@ -121,6 +127,8 @@ public class Simulator extends Thread {
 	 * @throws BusinessException
 	 */
 	public void simulation() throws BusinessException {
+		LOGGER.info("[Simulator]::[simulation] --- Send data");
+		
 		Set<Integer> ids = new HashSet<Integer>();
 		List<Actuator> actuators = new ArrayList<Actuator>();
 		
@@ -133,7 +141,7 @@ public class Simulator extends Thread {
 		Map<Integer, Pianification> pianifications = this.pianificationService.getAllActive(ids);
 		
 		for (SmartRoom sm : this.smartRooms) {
-			Pianification p = pianifications.get(sm.getId());
+			Pianification p = pianifications.get(sm.getId()); 
 			
 			int randomFlag = (int)Math.floor(Math.random() * (100 - 1 + 1) +1);
 			
@@ -144,7 +152,7 @@ public class Simulator extends Thread {
 						if (p != null && p.isActive()) {
 							s.setValue(truncateDecimal(s.getValue() + Math.floor(rd.nextDouble() * 10) / 10, 1).doubleValue());
 							this.broker.publish(
-								ChannelType.SENSOR,
+								ChannelType.SENSOR, 
 								MessageChannel.SENSOR_CHANNEL
 									.replace("{srId}", String.valueOf(sm.getId()))
 									.replace("{snsId}", String.valueOf(s.getId())), 
@@ -178,9 +186,10 @@ public class Simulator extends Thread {
 					e.printStackTrace();
 				}
 			}
-			
+
 			// subscribe to executor channels and simulate the actuators behavior
-			if (!this.broker.getMessages().isEmpty()) {
+			if (!this.broker.getChannelsMessages(ChannelType.EXECUTOR_MONITOR).isEmpty()) {
+				
 				try {
 					List<Channel> executorChannelData = (List<Channel>)this.broker.getChannels().get(ChannelType.EXECUTOR_MONITOR);
 					
@@ -195,15 +204,6 @@ public class Simulator extends Thread {
 							for (String message : channel.getMessages()) {
 								ChannelPayload payload = (ChannelPayload)this.objectMapper.readValue(message, ChannelPayload.class);
 								if (act.getId() == payload.getId()) {
-									LOGGER.info("[Simulator]::[run] --- Publish on ACTUATOR MONITOR");
-									// send actuator data where control panel are listening
-									this.broker.publish(
-										ChannelType.ACTUATOR_MONITOR,
-										MessageChannel.MONITOR_ACTUATOR_CHANNEL
-											.replace("{srId}", Integer.toString(sm.getId()))
-											.replace("{actId}", String.valueOf(act.getId())),  
-											this.objectMapper.writeValueAsString(new ChannelPayload(act.getId(), act.getPower()))
-									);	
 									// update actuator on the database if is inactive
 									if (payload.getValue() > 0 && !act.isActive()) {
 										act.setActive(true);

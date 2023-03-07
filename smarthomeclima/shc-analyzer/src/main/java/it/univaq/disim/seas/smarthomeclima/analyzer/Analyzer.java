@@ -33,9 +33,9 @@ public class Analyzer {
 	@Autowired
 	private PolicyGroupService policyGroupService;
 	
-	private Map<Integer, Configuration> actualConfigurations;
 	private LocalDateTime clock;
 	
+	private Map<Integer, Configuration> actualConfigurations;
 	private Map<Integer, List<PolicyGroup>> policyGroups;
 
 	/**
@@ -182,15 +182,15 @@ public class Analyzer {
 			// es. 1:01 == 1:45 && 1:01 <= 1:45 && 2:00 > 1:45
 			if (
 				(
-					p.getStartHour().getHour() == LocalDateTime.now().getHour() && 
-					p.getStartHour().getMinute() <= LocalDateTime.now().getMinute() && 
-					p.getEndHour().getHour() > LocalDateTime.now().getHour() 
+					p.getStartHour().getHour() == this.clock.getHour() && 
+					p.getStartHour().getMinute() <= this.clock.getMinute() && 
+					p.getEndHour().getHour() > this.clock.getHour() 
 				) ||
 				(
 					// es. 1:01 < 2:00 && 2:00 == 2:00 && 2:00 == 2:00
-					p.getStartHour().getHour() < LocalDateTime.now().getHour() && 
-					p.getEndHour().getHour() == LocalDateTime.now().getHour() &&
-					p.getEndHour().getMinute() == LocalDateTime.now().getMinute()				
+					p.getStartHour().getHour() < this.clock.getHour() && 
+					p.getEndHour().getHour() == this.clock.getHour() &&
+					p.getEndHour().getMinute() == this.clock.getMinute()				
 				) ||
 				(
 					p.getStartHour().getHour() == 23 && 

@@ -111,7 +111,7 @@ public class Planner {
 							}
 						}
 					}
-					targetPianificationTime.plusMinutes(Configurator.MODE_DURATION.get(actualConfigurations.get(entry.getKey()).getPolicyGroup().getMode()));
+					targetPianificationTime = clock.plusMinutes(Configurator.MODE_DURATION.get(actualConfigurations.get(entry.getKey()).getPolicyGroup().getMode()));
 					// Danger case
 				} else if (motion == 1 || temperatureCode == Configurator.DANGER_LOW_TEMP_CODE || temperatureCode == Configurator.DANGER_HIGH_TEMP_CODE) {
 					if (actualConfigurations.get(entry.getKey()).getPolicyGroup().getSeason().equals(Season.WINTER)) {
@@ -134,7 +134,7 @@ public class Planner {
 							actions.get(entry.getKey()).add(new Execution(act.getId(), Configurator.ON, 1));								
 						}
 					}
-					targetPianificationTime.plusMinutes(Configurator.MODE_DURATION.get(actualConfigurations.get(entry.getKey()).getPolicyGroup().getMode()));
+					targetPianificationTime = clock.plusMinutes(Configurator.MODE_DURATION.get(actualConfigurations.get(entry.getKey()).getPolicyGroup().getMode()));
 
 					// Danger Priority case
 				} else if (temperatureCode == Configurator.DANGER_PRIORITY_LOW_TEMP_CODE || temperatureCode == Configurator.DANGER_PRIORITY_LOW_TEMP_CODE) {
@@ -175,21 +175,23 @@ public class Planner {
 							
 						}
 					}
-					targetPianificationTime.plusMinutes(Configurator.MODE_DURATION.get(Mode.POWER));
+					targetPianificationTime = clock.plusMinutes(Configurator.MODE_DURATION.get(Mode.POWER));
 				}
 				
-				
 				// Create pianification
-				Pianification pianification = new Pianification(
-					currentMode, 
-					true,
-					clock,
-					targetPianificationTime,
-					actualConfigurations.get(entry.getKey()).getSmartRoom()
-				);
-				
-				LOGGER.info("[Planner]::[planning] --- Save new pianification --- SmartRoom ---  " + actualConfigurations.get(entry.getKey()).getSmartRoom().getId());
-				this.pianificationService.createPianification(pianification);
+				if (!actions.get(entry.getKey()).isEmpty()) {
+					
+					Pianification pianification = new Pianification(
+						currentMode, 
+						true,
+						clock,
+						targetPianificationTime,
+						actualConfigurations.get(entry.getKey()).getSmartRoom()
+					);
+					
+					LOGGER.info("[Planner]::[planning] --- Save new pianification --- SmartRoom ---  " + actualConfigurations.get(entry.getKey()).getSmartRoom().getId());
+					this.pianificationService.createPianification(pianification);		
+				}
 				
 			}
 		}

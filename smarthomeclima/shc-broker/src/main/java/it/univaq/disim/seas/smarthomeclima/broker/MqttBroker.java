@@ -83,6 +83,17 @@ public class MqttBroker implements MqttCallback {
 		return this.channels.get(type); 
 	}
 	
+	public List<String> getChannelsMessages(ChannelType type) {
+		List<String> msg = new ArrayList<String>();
+		if (!this.channels.containsKey(type)) return msg;
+		
+		for (Channel ch : channels.get(type)) {
+			if (ch.getMessages().isEmpty()) continue;
+			msg.addAll(ch.getMessages());
+		}
+		return msg;
+	}
+	
 	public void setSingleChannel(ChannelType type, String topic) {
 		// Set channel data
 		if (this.channels.containsKey(type)) {
@@ -100,17 +111,15 @@ public class MqttBroker implements MqttCallback {
 	public void publish(ChannelType type, String topic, String mess) {
 		MqttMessage message = new MqttMessage();
 		
+		this.setSingleChannel(type, topic);	
+		
 		// Set channel data
-		if (this.channels.containsKey(type)) {
-			for (Channel ch : this.channels.get(type)) {
-				if (ch.getTopic().equals(topic)) {
-					ch.getMessages().add(mess);
-				}
+		for (Channel ch : this.channels.get(type)) {
+			if (ch.getTopic().equals(topic)) {
+				ch.getMessages().add(mess);
 			}
-		} else {
-			this.channels.put(type, new ArrayList<Channel>());
-			this.channels.get(type).add(new Channel(topic, mess));			
 		}
+		
 
 		try {
 			LOGGER.info("[MqttBroker]::[publish]::Send message to " + topic);
