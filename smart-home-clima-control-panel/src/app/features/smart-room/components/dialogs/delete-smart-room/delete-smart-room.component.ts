@@ -7,7 +7,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { SmartRoom } from 'src/app/models/smart-room.model';
 import { AppState } from 'src/app/state/app.state';
 
-import { SmartRoomDeleteAction } from 'src/app/features/smart-room/store/actions/smart-room.actions';
+import { SmartRoomDeleteAction, SmartRoomLoadAction } from 'src/app/features/smart-room/store/actions/smart-room.actions';
 import * as smartRoomSelectors from 'src/app/features/smart-room/store/selectors/smart-room.selectors';
 
 @Component({
@@ -53,6 +53,7 @@ export class DeleteSmartRoomComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy))
       .subscribe((loading: boolean) => {
         if (!loading) {
+          this.store.dispatch(SmartRoomLoadAction());
           this.dialogRef.close({result: 'close_after_delete' });
         }
       });

@@ -10,6 +10,10 @@ import { Observable, Subject, Subscription, takeUntil } from 'rxjs';
 import { AppState } from 'src/app/state/app.state';
 
 import { SmartRoomLoadAction } from 'src/app/features/smart-room/store/actions/smart-room.actions';
+import { SensorLoadAction } from 'src/app/features/sensor/store/actions/sensor.actions';
+import { ActuatorLoadAction } from 'src/app/features/actuator/store/actions/actuator.actions';
+import { PolicyGroupLoadAction } from 'src/app/features/policy-group/store/actions/policy-group.actions';
+
 import * as smartRoomSelectors from 'src/app/features/smart-room/store/selectors/smart-room.selectors';
 
 @Component({
@@ -30,7 +34,6 @@ export class SmartRoomListComponent implements OnInit, OnDestroy {
 
   constructor(
     public newSmartRoomDialog: MatDialog,
-    private router: Router,
     private store: Store<AppState>
   ) {
     this.isLoading = true;
@@ -43,6 +46,13 @@ export class SmartRoomListComponent implements OnInit, OnDestroy {
     this.selectSmartRooms();
   }
   
+  ngOnDestroy(): void {
+    this.store.complete();
+    this.destroy.next(true);
+    this.destroy.unsubscribe();
+    if (this.subscription) this.subscription.unsubscribe();    
+  }
+
   public openNewSmartRoomModal(): void {
     const dialogRef = this.newSmartRoomDialog.open(EditSmartRoomComponent, {
       width: '40%',
@@ -56,6 +66,7 @@ export class SmartRoomListComponent implements OnInit, OnDestroy {
     this.subscription.add(
       dialogRef.afterClosed().subscribe((response) => {
         if (response.result === 'close_after_new') {
+          this.store.dispatch(SmartRoomLoadAction());
         }
       })
     );
@@ -98,13 +109,6 @@ export class SmartRoomListComponent implements OnInit, OnDestroy {
     );
 
     this.error$ = this.store.pipe(select(smartRoomSelectors.selectSmartRoomError));
-  }
-
-  ngOnDestroy(): void {
-    this.store.complete();
-    this.destroy.next(true);
-    this.destroy.unsubscribe();
-    if (this.subscription) this.subscription.unsubscribe();    
   }
 
 }

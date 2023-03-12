@@ -1,12 +1,12 @@
 <!-- DETAIL PAGE -->
 <div class="page-card-container">
 
+    <!-- Spinner -->
     <div *ngIf="isLoading; else loadingComplete">
-        <div class="row align-items-center">
-            <div class="col text-center my-4">
-                <div class="spinner-border text-success" style="width: 3rem; height: 3rem" role="status">
-                    <span class="sr-only">Loading...</span>
-                </div>
+        <div class="row justify-content-md-center py-2" style="position: absolute;left:50%;top:45%;">
+            <div class="col-12 mat-spinner-container">
+                <mat-progress-spinner class="mat-spinner-color" [diameter]="75" color="primary" mode="indeterminate">
+                </mat-progress-spinner>
             </div>
         </div>
     </div>
@@ -22,14 +22,41 @@
                     <div class="col-auto d-flex">
                         <!-- Page title + Go Back button -->
                         <div class="d-inline-block">
-                            <a [routerLink]="['/control-panel']" title="Home"
-                                class="link font-weight-400 pt-1 col-auto text-black">
-                                <i class="fa fa-angle-left fa-2x" aria-hidden="true"></i>
+                            <a [routerLink]="['/control-panel']" title="Home">
+                                <button mat-icon-button color="primary" aria-label="Navigate to Home">
+                                    <mat-icon>arrow_back_ios_new</mat-icon>
+                                </button>
                             </a>
                         </div>
+                        <div class="horizontal-spacer"></div>
                     </div>
                     <div class="col-auto d-flex">
-                        <h2 class="card-header-text d-inline-block mb-0">{{ smartRoom.number }} - {{ smartRoom.type }}</h2>
+                        <div class="d-inline-block me-3">
+                            <h2 class="card-header-text d-inline-block mb-0 mt-2">{{ smartRoom.number }}</h2>
+                        </div>
+                        <div class="horizontal-spacer"></div>
+                        <div class="d-inline-block">
+                            <div class="smart-room-icon">
+                                <ng-container *ngIf="smartRoom.type == 'BED_ROOM'">
+                                    <mat-icon fontIcon="bed"></mat-icon>
+                                </ng-container>
+                                <ng-container *ngIf="smartRoom.type == 'LIVING_ROOM'">
+                                    <mat-icon fontIcon="chair"></mat-icon>
+                                </ng-container>
+                                <ng-container *ngIf="smartRoom.type == 'DINING_ROOM'">
+                                    <mat-icon fontIcon="flatware"></mat-icon>
+                                </ng-container>
+                                <ng-container *ngIf="smartRoom.type == 'KITCHEN_ROOM'">
+                                    <mat-icon fontIcon="cooking"></mat-icon>
+                                </ng-container>
+                                <ng-container *ngIf="smartRoom.type == 'BATH_ROOM'">
+                                    <mat-icon fontIcon="bathtub"></mat-icon>
+                                </ng-container>
+                            </div>
+                        </div>
+                        <div class="d-inline-block me-2">
+                            <h2 class="card-header-text d-inline-block mb-0 mt-2">{{ smartRoomType }}</h2>
+                        </div>
                     </div>
 
                     <div class="col-sm col-md px-4 d-flex flex-column align-items-end">

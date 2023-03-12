@@ -19,6 +19,7 @@ import { SmartRoom, SmartRoomRequest } from 'src/app/models/smart-room.model';
 
 import { SmartRoomDialogConf, DeleteDialogConf } from 'src/app/config/dialog.config';
 
+import Utility from 'src/app/shared/utility';
 @Component({
   selector: 'app-detail',
   templateUrl: './detail.component.html',
@@ -85,6 +86,10 @@ export class DetailComponent implements OnInit, OnDestroy {
     if (this.subscription) this.subscription.unsubscribe();    
   }
 
+  get smartRoomType(): String {
+    return Utility.capitalizeWords(this.smartRoom.type.replace("_", " ").toLowerCase());
+  }
+
   public openEditSmartRoomDialog(): void {
     this.editSmartRoomDialogRef.data.smartRoom = { ...this.smartRoom };
     this.editSmartRoomDialogRef.data.operation = 'edit'; 
@@ -147,7 +152,7 @@ export class DetailComponent implements OnInit, OnDestroy {
 
     this.motionValues = motionSensor?.values ? [ ...motionSensor.values ] : [];
 
-    if (this.smartRoom.policyGroups && this.smartRoom.policyGroups[0].season == 'WINTER') {
+    if (this.smartRoom.policyGroups && this.smartRoom.policyGroups.length && this.smartRoom.policyGroups[0].season == 'WINTER') {
       if (this.powerValues && radiatorActuator?.values && this.powerValues.length == radiatorActuator?.values.length) this.powerValues = [ ...this.powerValues ];
       else this.powerValues = radiatorActuator?.values ? [ ...radiatorActuator.values ] : [];
     } else {

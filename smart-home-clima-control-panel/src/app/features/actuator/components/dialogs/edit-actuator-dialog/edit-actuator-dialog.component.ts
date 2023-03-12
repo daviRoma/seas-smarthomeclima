@@ -23,8 +23,8 @@ export class EditActuatorDialogComponent implements OnInit {
   
   public dialogConfig: any;
   public smartRoom: SmartRoom;
-  public actuators!: Actuator[];
-  public deletedActuators!: Actuator[];
+  public actuators: Actuator[];
+  public deletedActuators: Actuator[];
 
   public types: any = Types;
 
@@ -36,13 +36,11 @@ export class EditActuatorDialogComponent implements OnInit {
     this.dialogConfig = this.data;
     this.smartRoom = this.data.smartRoom;
 
-    this.actuators = [ ...this.smartRoom.actuators ? this.smartRoom.actuators : []];
-
+    this.actuators = this.smartRoom.actuators ? JSON.parse(JSON.stringify(this.smartRoom.actuators)): [];
+    this.deletedActuators = [];
   }
 
-  ngOnInit(): void {
-    
-  }
+  ngOnInit(): void {}
 
   addActuator() {
     this.actuators?.push(new Actuator());
@@ -51,8 +49,8 @@ export class EditActuatorDialogComponent implements OnInit {
   deleteActuator(sensorId: number) {
     let index = this.actuators?.findIndex(sensor => sensor.id == sensorId);
     if (index > -1) {
-      this.actuators.splice(index, 1);
       if (this.actuators[index].id) this.deletedActuators.push(this.actuators[index]);
+      this.actuators.splice(index, 1);
     }
   }
 

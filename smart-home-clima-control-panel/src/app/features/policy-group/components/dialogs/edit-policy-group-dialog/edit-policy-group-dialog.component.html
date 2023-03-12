@@ -21,22 +21,6 @@
                         </div>
                     </div>
 
-                    <!-- Season -->
-                    <div class="col-6">
-                        <div class="form-group">
-                            <mat-form-field appearance="fill">
-                                <mat-label>Season</mat-label>
-                                <mat-select formControlName="season" requires>
-                                    <mat-option value="null">Select one...</mat-option>
-                                    <mat-option *ngFor="let season of seasons | keyvalue" [value]="season.value">{{ season.value }}</mat-option>
-                                </mat-select>
-                            </mat-form-field>
-                        </div>
-                    </div>
-
-                </div>
-
-                <div class="row">
                     <div class="col-6">
                         <div class="form-group">
                             <mat-form-field appearance="fill">
@@ -45,6 +29,22 @@
                                 <mat-hint>DD/MM/YYYY</mat-hint>
                                 <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
                                 <mat-datepicker #picker></mat-datepicker>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Season -->
+                    <div class="col-6">
+                        <div class="form-group">
+                            <mat-form-field appearance="fill">
+                                <mat-label>Season</mat-label>
+                                <mat-select formControlName="season" requires>
+                                    <mat-option value="null">Select one...</mat-option>
+                                    <mat-option *ngFor="let season of seasons | keyvalue" [value]="season.value">{{ season.value
+                                        }}</mat-option>
+                                </mat-select>
                             </mat-form-field>
                         </div>
                     </div>

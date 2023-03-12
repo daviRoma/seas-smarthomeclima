@@ -51,7 +51,7 @@ export const SensorLoadOneFailureAction = createAction(
 
 export const SensorNewAction = createAction(
   SensorActionTypes.NEW,
-  props<{payload: SensorRequest}>()
+  props<SensorRequest>()
 );
 
 export const SensorNewSuccessAction = createAction(
@@ -66,7 +66,7 @@ export const SensorNewFailureAction = createAction(
 
 export const SensorUpdateAction = createAction(
   SensorActionTypes.UPDATE,
-  props<{payload: SensorRequest}>()
+  props<SensorRequest>()
 );
 
 export const SensorUpdateFailureAction = createAction(
@@ -76,7 +76,7 @@ export const SensorUpdateFailureAction = createAction(
 
 export const SensorDeleteAction = createAction(
   SensorActionTypes.DELETE,
-  props<{payload: SensorRequest}>()
+  props<SensorRequest>()
 );
 
 export const SensorDeleteSuccesAction = createAction(

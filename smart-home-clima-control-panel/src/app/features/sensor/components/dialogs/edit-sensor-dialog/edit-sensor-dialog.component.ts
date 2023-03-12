@@ -23,8 +23,8 @@ export class EditSensorDialogComponent implements OnInit {
   
   public dialogConfig: any;
   public smartRoom: SmartRoom;
-  public sensors!: Sensor[];
-  public deletedSensors!: Sensor[];
+  public sensors: Sensor[];
+  public deletedSensors: Sensor[];
 
   public types: any = Types;
 
@@ -36,8 +36,8 @@ export class EditSensorDialogComponent implements OnInit {
     this.dialogConfig = this.data;
     this.smartRoom = this.data.smartRoom;
 
-    this.sensors = [ ...this.smartRoom.sensors ? this.smartRoom.sensors : []];
-
+    this.sensors = this.smartRoom.sensors ? JSON.parse(JSON.stringify(this.smartRoom.sensors)) : [];
+    this.deletedSensors = [];
   }
 
   ngOnInit(): void {
@@ -49,10 +49,10 @@ export class EditSensorDialogComponent implements OnInit {
   }
 
   deleteSensor(sensorId: number) {
-    let index = this.sensors?.findIndex(sensor => sensor.id == sensorId);
+    let index = this.sensors.findIndex(sensor => sensor.id == sensorId);
     if (index > -1) {
-      this.sensors.splice(index, 1);
       if (this.sensors[index].id) this.deletedSensors.push(this.sensors[index]);
+      this.sensors.splice(index, 1);
     }
   }
 
@@ -64,9 +64,9 @@ export class EditSensorDialogComponent implements OnInit {
       delete: { sensors: this.deletedSensors, smartRoomId: this.smartRoom.id } as SensorRequest
     };
 
-    if (payloads.new.sensors) this.store.dispatch(SensorNewAction({ payload: payloads.new }));
-    if (payloads.update.sensors) this.store.dispatch(SensorUpdateAction({ payload: payloads.update }));
-    if (payloads.delete.sensors) this.store.dispatch(SensorDeleteAction({ payload: payloads.delete }));
+    if (payloads.new.sensors && payloads.new.sensors.length) this.store.dispatch(SensorNewAction(payloads.new));
+    if (payloads.update.sensors && payloads.update.sensors.length) this.store.dispatch(SensorUpdateAction(payloads.update));
+    if (payloads.delete.sensors && payloads.delete.sensors.length) this.store.dispatch(SensorDeleteAction(payloads.delete));
 
     this.dialogRef.close({ result: 'close_after_update'});
   }

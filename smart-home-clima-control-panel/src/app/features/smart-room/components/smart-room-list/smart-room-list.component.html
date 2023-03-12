@@ -1,4 +1,4 @@
-<div class="container mb-3">
+<div class="container mb-1">
 
     <div class="row">
         <div class="col-12">
@@ -45,6 +45,9 @@
                                                         <span class="ms-2">{{ sensor.type }}</span>
                                                     </div>
                                                 </ng-container>
+                                                <div *ngIf="!smartRoom.sensors.length" class="py-3">
+                                                    <span class="no-data-text">No sensor found</span>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="col-sm pt-2 pb-1">
@@ -63,6 +66,9 @@
                                                         <span class="ms-2">{{ actuator.type }}</span>
                                                     </div>
                                                 </ng-container>
+                                                <div *ngIf="!smartRoom.actuators.length" class="py-3">
+                                                    <span class="no-data-text">No actuator found</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

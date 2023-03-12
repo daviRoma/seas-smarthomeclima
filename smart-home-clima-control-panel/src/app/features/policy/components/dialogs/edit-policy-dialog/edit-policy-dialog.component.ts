@@ -9,6 +9,7 @@ import { Policy, PolicyRequest } from 'src/app/models/policy.model';
 import { AppState } from 'src/app/state/app.state';
 
 import { PolicyNewAction, PolicyUpdateAction, PolicyDeleteAction } from 'src/app/features/policy/store/actions/policy.actions';
+import Utility from 'src/app/shared/utility';
 
 @Component({
   selector: 'app-edit-policy-dialog',
@@ -36,7 +37,11 @@ export class EditPolicyDialogComponent implements OnInit {
 
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.policies = this.policies.map(policy => {
+      return { ...policy, endHour:  Utility.getTimeAsString(policy.endHour), startHour: Utility.getTimeAsString(policy.startHour) };
+    });
+  }
 
   addPolicy() {
     this.policies?.push(new Policy());
@@ -70,9 +75,9 @@ export class EditPolicyDialogComponent implements OnInit {
       } as PolicyRequest
     };
 
-    if (payloads.new.policies) this.store.dispatch(PolicyNewAction({ payload: payloads.new }));
-    if (payloads.update.policies) this.store.dispatch(PolicyUpdateAction({ payload: payloads.update }));
-    if (payloads.delete.policies) this.store.dispatch(PolicyDeleteAction({ payload: payloads.delete }));
+    if (payloads.new.policies && payloads.new.policies.length) this.store.dispatch(PolicyNewAction({ payload: payloads.new }));
+    if (payloads.update.policies && payloads.update.policies.length) this.store.dispatch(PolicyUpdateAction({ payload: payloads.update }));
+    if (payloads.delete.policies && payloads.update.policies.length) this.store.dispatch(PolicyDeleteAction({ payload: payloads.delete }));
   }
 
   closeDialog(): void {

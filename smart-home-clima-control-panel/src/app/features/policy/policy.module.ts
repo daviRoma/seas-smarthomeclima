@@ -20,13 +20,11 @@ import {
 } from '@angular/cdk/overlay';
 
 import { EditPolicyDialogComponent } from './components/dialogs/edit-policy-dialog/edit-policy-dialog.component';
-import { DeletePolicyDialogComponent } from './components/dialogs/delete-policy-dialog/delete-policy-dialog.component';
 
 
 @NgModule({
   declarations: [
-    EditPolicyDialogComponent,
-    DeletePolicyDialogComponent
+    EditPolicyDialogComponent
   ],
   imports: [
     CommonModule,
@@ -41,7 +39,7 @@ import { DeletePolicyDialogComponent } from './components/dialogs/delete-policy-
     MatButtonModule
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  exports: [EditPolicyDialogComponent, DeletePolicyDialogComponent],
+  exports: [EditPolicyDialogComponent],
   providers: [
     MatDatepickerModule,
     { provide: OverlayContainer, useClass: FullscreenOverlayContainer },

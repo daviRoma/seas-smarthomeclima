@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { NGXLogger } from 'ngx-logger';
 import { Observable } from 'rxjs';
 
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { serverConfiguration } from 'src/app/config/server.config';
 
@@ -58,7 +58,8 @@ export class SensorService {
   public updateSensor(request: SensorRequest): Observable<any> {
     this.logger.debug('SensorService', 'updateSensor', request);
     const url = `${this.BASE_URL}/sensors`;
-    return this.httpClient.put<any>(url, request, { });
+
+    return this.httpClient.put<any>(url, request, { headers: new HttpHeaders({ 'Content-Type': 'application/json' }) });
   }
 
   /**
@@ -68,7 +69,14 @@ export class SensorService {
   public deleteSensor(request: SensorRequest): Observable<any> {
     this.logger.debug('SensorService', 'deleteSensor', request.sensors);
     const url = `${this.BASE_URL}/sensors`;
-    return this.httpClient.post<any>(url, request, { });
+
+    const options = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+      }),
+      body: request
+    };
+    return this.httpClient.delete<any>(url, options);
   }
 
 }

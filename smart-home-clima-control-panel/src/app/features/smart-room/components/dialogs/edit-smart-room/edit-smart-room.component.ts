@@ -51,18 +51,19 @@ export class EditSmartRoomComponent {
   onSubmit(event: any): void {
     event.preventDefault();
 
-    const payload = this.smartRoomForm.value as SmartRoom;
-
     this.dialogConfig.operation === 'new' ?
-      this.store.dispatch(SmartRoomNewAction({payload: { ...payload }})) :
-      this.store.dispatch(SmartRoomUpdateAction({payload: { ...payload, id: this.smartRoom.id }}));
+      this.store.dispatch(SmartRoomNewAction({payload: { ...this.smartRoomForm.value } as SmartRoom })) :
+      this.store.dispatch(SmartRoomUpdateAction({payload: { ...this.smartRoomForm.value, id: this.smartRoom.id }}));
+
+      this.dialogRef.close({ result: 'close_after_new' });
   }
 
   closeDialog(): void {
     this.dialogRef.close({ result: 'close_cancel' });
   }
 
-  cancel(): void {
+  cancel(event: any): void {
+    event.preventDefault();
     this.closeDialog();
   }
 }

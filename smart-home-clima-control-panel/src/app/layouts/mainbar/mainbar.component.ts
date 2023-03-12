@@ -1,11 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-import { AppState } from 'src/app/state/app.state';
-
+import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Subject, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { NGXLogger } from 'ngx-logger';
+
+import { AppState } from 'src/app/state/app.state';
 
 import * as monitorSelector from 'src/app/store/monitor.selectors';
+
+import { SmartRoomLoadAction } from 'src/app/features/smart-room/store/actions/smart-room.actions';
 
 import { MonitorStartMonitoringAction, MonitorStopMonitoringAction } from 'src/app/store/monitor.actions';
 import { Monitor } from 'src/app/models/monitor.model';
@@ -22,19 +26,19 @@ export class MainbarComponent implements OnInit {
   private destroy: Subject<boolean> = new Subject<boolean>();
 
   constructor(
-    private store: Store<AppState>
+    private store: Store<AppState>,
+    private logger: NGXLogger,
   ) {
     this.isStarting = false;
   }
 
   ngOnInit(): void {
-    const selectMonitor = monitorSelector.selectEntitiesById(1);
     this.subscription.add(
       this.store
-      .select(selectMonitor)
+      .select(monitorSelector.selectEntitiesById(1))
       .pipe(takeUntil(this.destroy))
       .subscribe((result: Monitor | undefined) => {
-        console.log('[Mainbar]::[Monitor]', result);
+        this.logger.info('[Mainbar]', '[ngOnInit]', 'selecting...', result);
         if (result) this.isStarting = result ? result.isStarted : false;
       })
     );
@@ -47,5 +51,9 @@ export class MainbarComponent implements OnInit {
 
   stopSmartHomeMonitoring(): void {
     this.store.dispatch(MonitorStopMonitoringAction());
+  }
+
+  refreshdata(): void {
+    this.store.dispatch(SmartRoomLoadAction());
   }
 }

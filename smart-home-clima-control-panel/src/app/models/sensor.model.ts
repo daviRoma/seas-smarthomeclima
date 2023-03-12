@@ -10,5 +10,5 @@ export class Sensor {
 
 export class SensorRequest {
     sensors!: Sensor[];
-    smartRoomId!: number
+    smartRoomId!: number;
 }

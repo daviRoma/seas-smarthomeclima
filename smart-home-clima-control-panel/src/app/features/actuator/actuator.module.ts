@@ -20,12 +20,10 @@ import {
 } from '@angular/cdk/overlay';
 
 import { EditActuatorDialogComponent } from './components/dialogs/edit-actuator-dialog/edit-actuator-dialog.component';
-import { DeleteActuatorDialogComponent } from './components/dialogs/delete-actuator-dialog/delete-actuator-dialog.component';
 
 @NgModule({
   declarations: [
-    EditActuatorDialogComponent,
-    DeleteActuatorDialogComponent
+    EditActuatorDialogComponent
   ],
   imports: [
     CommonModule,
@@ -40,7 +38,7 @@ import { DeleteActuatorDialogComponent } from './components/dialogs/delete-actua
     MatButtonModule
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  exports: [EditActuatorDialogComponent, DeleteActuatorDialogComponent],
+  exports: [EditActuatorDialogComponent],
   providers: [
     MatDatepickerModule,
     { provide: OverlayContainer, useClass: FullscreenOverlayContainer },

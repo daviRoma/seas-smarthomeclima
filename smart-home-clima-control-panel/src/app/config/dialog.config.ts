@@ -25,6 +25,7 @@ export const EditDialogConf = {
   position: { top: '6%' },
   data: {
     smartRoom: null,
+    item: null,
     dialogConfig
   },
 };

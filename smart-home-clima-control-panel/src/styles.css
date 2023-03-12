@@ -10,6 +10,11 @@ a {
     text-decoration: none;
 }
 
+a.mainbar-button {
+    color: #fff;
+    
+}
+
 .page-title {
     color: #343434;
 }
@@ -60,6 +65,18 @@ a {
     color: #ce2a2a;
 }
 
+.horizontal-spacer {
+    border-right: 1px solid #dedede;
+    margin-right: 1rem;
+    margin-left: 1rem;
+}
+
+.no-data-text {
+    font-style: italic;
+}
+
+/* Overrides */
+
 .mat-mdc-raised-button.mat-primary {
     --mdc-protected-button-container-color: #365775;
     --mdc-protected-button-label-text-color: #fff;
@@ -84,6 +101,10 @@ a {
     --mdc-fab-container-color: #365775;
     --mdc-fab-icon-color: #fff;
     --mat-mdc-fab-color: #fff;
+}
+
+.mat-mdc-progress-spinner {
+    --mdc-circular-progress-active-indicator-color: #365775;
 }
 
 /* TEXT */

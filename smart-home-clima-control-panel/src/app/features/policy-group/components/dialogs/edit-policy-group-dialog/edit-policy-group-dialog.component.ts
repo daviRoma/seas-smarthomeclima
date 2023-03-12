@@ -45,7 +45,7 @@ export class EditPolicyGroupDialogComponent implements OnInit {
     this.dialogConfig = this.data;
     this.smartRoom = this.data.smartRoom;
 
-    this.policyGroup = this.smartRoom.policyGroups ? this.smartRoom.policyGroups.filter(pg => pg.active)[0] : new PolicyGroup();
+    this.policyGroup = this.data.item;
 
     this.policyGroupForm = this.formBuilder.group({
       season: [this.policyGroup.season, [Validators.required]],

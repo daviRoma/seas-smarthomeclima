@@ -59,8 +59,8 @@ export class SmartRoomEffects {
     public createSmartRoom = createEffect(() => 
         this.actions.pipe(
             ofType(SmartRoomActionTypes.NEW),
-            switchMap((params: SmartRoom) =>
-                this.smartRoomService.createSmartRoom(params).pipe(
+            switchMap((params: any) =>
+                this.smartRoomService.createSmartRoom(params.payload).pipe(
                     map((response: SmartRoom) =>
                         ({ type: SmartRoomActionTypes.NEW_SUCCESS, payload: response})
                     ),
@@ -73,8 +73,8 @@ export class SmartRoomEffects {
     public updateSmartRoom = createEffect(() => 
         this.actions.pipe(
             ofType(SmartRoomActionTypes.UPDATE),
-            switchMap((request: SmartRoom) =>
-                this.smartRoomService.updateSmartRoom(request).pipe(
+            switchMap((request: any) =>
+                this.smartRoomService.updateSmartRoom(request.payload).pipe(
                     map((response: any) => 
                         ({ type: SmartRoomActionTypes.UPDATE_SUCCESS, payload: response})
                     ),
@@ -99,8 +99,8 @@ export class SmartRoomEffects {
     public deleteSmartRoom = createEffect(() => 
         this.actions.pipe(
             ofType(SmartRoomActionTypes.DELETE),
-            switchMap((param: number) =>
-                this.smartRoomService.deleteSmartRoom(param).pipe(
+            switchMap((params: any) =>
+                this.smartRoomService.deleteSmartRoom(params.id).pipe(
                     map((response: any) => ({ type: SmartRoomActionTypes.DELETE_SUCCESS, payload: response})),
                     catchError((error) => of({type: SmartRoomActionTypes.DELETE_FAILURE, payload: error}))
                 )

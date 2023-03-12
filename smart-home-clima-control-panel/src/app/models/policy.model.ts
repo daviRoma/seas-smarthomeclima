@@ -5,8 +5,8 @@ export class Policy {
 	reactiveMargin?: number;
 	dangerMargin?: number;
 	optimalTemperature?: number;
-	startHour!: Date;
-	endHour!: Date;
+	startHour!: any;
+	endHour!: any;
 	active?: boolean;
 	policyGroup?: PolicyGroup;
 }

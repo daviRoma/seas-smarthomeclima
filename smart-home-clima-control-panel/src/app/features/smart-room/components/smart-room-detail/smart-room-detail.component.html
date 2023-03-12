@@ -36,11 +36,21 @@
                         </div>
                         <div class="col-sm-4 col-md-5 py-1">
                             <span><b>Mode</b></span><br>
-                            <span class="policy-group mode {{ policyGroup.mode == 'ECO' ? 'text-green' : policyGroup.mode == 'COMFORT' ? 'text-blue' : 'text-red'}}">{{ policyGroup ? policyGroup.mode : '-' }}</span>
+                            <ng-container *ngIf="policyGroup && policyGroup.mode; else modeUndefined">
+                                <span class="policy-group mode {{ policyGroup.mode == 'ECO' ? 'text-green' : policyGroup.mode == 'COMFORT' ? 'text-blue' : 'text-red'}}">{{ policyGroup ? policyGroup.mode : '-' }}</span>
+                            </ng-container>
+                            <ng-template #modeUndefined>
+                                <span class="policy-group mode"> - </span>
+                            </ng-template>
                         </div>
                         <div class="col-sm-4 col-md-5 py-1">
                             <span><b>Season</b></span><br>
-                            <span class="policy-group seasons {{ policyGroup.season == 'WINTER' ? 'text-blue' : 'text-orange'}}">{{ policyGroup ? policyGroup.season : '-'}}</span>
+                            <ng-container *ngIf="policyGroup && policyGroup.season; else seasonUndefined">
+                                <span class="policy-group seasons {{ policyGroup.season == 'WINTER' ? 'text-blue' : 'text-orange'}}">{{ policyGroup ? policyGroup.season : '-'}}</span>
+                            </ng-container>
+                            <ng-template #seasonUndefined>
+                                <span class="policy-group seasons"> - </span>
+                            </ng-template>
                         </div>
                         <div class="col-sm-4 col-md-5 py-1">
                             <span><b>Start</b></span><br>
@@ -66,15 +76,15 @@
                         </div>
                         <div class="col-sm-3 col-md-4 py-1">
                             <span><b>Reactive Margin</b></span><br>
-                            <span>{{ policy ? policy.reactiveMargin : '-'}}</span>
+                            <span>{{ policy && policy.reactiveMargin ? policy.reactiveMargin : '-'}}</span>
                         </div>
                         <div class="col-sm-3 col-md-4 py-1">
                             <span><b>Danger Margin</b></span><br>
-                            <span>{{ policy ? policy.dangerMargin : '-'}}</span>
+                            <span>{{ policy && policy.dangerMargin ? policy.dangerMargin : '-'}}</span>
                         </div>
                         <div class="col-sm-3 col-md-4 py-1">
                             <span><b>Optimal Temperature</b></span><br>
-                            <span>{{ policy ? policy.optimalTemperature : '-'}}</span>
+                            <span>{{ policy && policy.optimalTemperature ? policy.optimalTemperature : '-'}}</span>
                         </div>
                         <div class="col-sm-3 col-md-4 py-1">
                             <span><b>Start Hour</b></span><br>
@@ -117,6 +127,12 @@
                                 </span>
                             </div>
                         </ng-container>
+
+                        <div *ngIf="!smartRoom.sensors.length" class="py-3">
+                            <div class="col-sm-12 col-md-12 py-1 mb-1 ">
+                                <span class="no-data-text">No sensor found</span>
+                            </div>
+                        </div>
                         <div class="d-flex col-12 py-1 settings-container">
                             <div class="col-4 actions">
                                 Actions
@@ -150,6 +166,11 @@
                                 </span>
                             </div>
                         </ng-container>
+                        <div *ngIf="!smartRoom.actuators.length" class="py-3">
+                            <div class="col-sm-12 col-md-12 py-1 mb-1 ">
+                                <span class="no-data-text">No actuator found</span>
+                            </div>
+                        </div>
                         <div class="d-flex col-12 py-1 settings-container">
                             <div class="col-4 actions">
                                 Actions

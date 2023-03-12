@@ -140,6 +140,7 @@ export class SmartRoomDetailComponent implements OnInit, OnDestroy {
 
   public openEditPolicyGroup(): void {
     this.editDialogRef.data.smartRoom = { ...this.smartRoom };
+    this.editDialogRef.data.item = { ...this.policyGroup };
     this.editDialogRef.data.operation = 'edit';
     this.editDialogRef.data.title = 'Edit Policy Group';
 
@@ -161,6 +162,7 @@ export class SmartRoomDetailComponent implements OnInit, OnDestroy {
     this.editDialogRef.data.smartRoom = { ...this.smartRoom };
     this.editDialogRef.data.operation = 'edit';
     this.editDialogRef.data.title = 'Edit Policies';
+    this.editDialogRef.maxHeight = "70%";
 
     const updateDialogRef = this.dialog.open(
       EditPolicyDialogComponent,
