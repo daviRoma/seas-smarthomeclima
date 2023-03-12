@@ -1,7 +1,10 @@
 package it.univaq.disim.seas.smarthomeclima.service.presentation;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,6 +30,12 @@ public class PolicyController {
 	
 	@Autowired
 	private PolicyGroupService policyGroupService;
+
+	@GetMapping
+	@ResponseBody
+	public List<Policy> getPolicies() throws BusinessException {
+		return this.policyService.findAll();
+	}
 	
 	@GetMapping("/{id}")
 	@ResponseBody
@@ -34,6 +43,7 @@ public class PolicyController {
 		return this.policyService.findById(id);
 	}
 	
+	@CrossOrigin(origins = "http://localhost:4200")
 	@PostMapping
 	public void createPolicy(@RequestBody PolicyRequest request) throws BusinessException {
 		PolicyGroup group = this.policyGroupService.findById(request.getPolicyGroupId());
@@ -49,6 +59,7 @@ public class PolicyController {
 		}
 	}
 	
+	@CrossOrigin(origins = "http://localhost:4200")
 	@PutMapping
 	public void updatePolicy(@RequestBody PolicyRequest request) throws BusinessException {		
 		PolicyGroup group = this.policyGroupService.findById(request.getPolicyGroupId());

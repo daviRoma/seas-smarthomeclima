@@ -1,7 +1,10 @@
 package it.univaq.disim.seas.smarthomeclima.service.presentation;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,9 +27,15 @@ public class ActuatorController {
 
 	@Autowired
 	private SmartRoomService smartRoomService;
+	
 	@Autowired
 	private ActuatorService actuatorService;
 	
+	@GetMapping
+	@ResponseBody
+	public List<Actuator> getActuators() throws BusinessException {
+		return this.actuatorService.findAll();
+	}
 	
 	@GetMapping("/{id}")
 	@ResponseBody
@@ -34,7 +43,8 @@ public class ActuatorController {
 		return this.actuatorService.findById(id);
 	}
 	
-	@PostMapping("")
+	@CrossOrigin(origins = "http://localhost:4200")
+	@PostMapping
 	public void createActuator(@RequestBody ActuatorRequest request) throws BusinessException {
 		SmartRoom sm = this.smartRoomService.findById(request.getSmartRoomId());
 		
@@ -44,7 +54,8 @@ public class ActuatorController {
 		}
 	}
 	
-	@PutMapping("")
+	@CrossOrigin(origins = "http://localhost:4200")
+	@PutMapping
 	public void updateActuator(@RequestBody ActuatorRequest request) throws BusinessException {
 		SmartRoom sm = this.smartRoomService.findById(request.getSmartRoomId());
 		

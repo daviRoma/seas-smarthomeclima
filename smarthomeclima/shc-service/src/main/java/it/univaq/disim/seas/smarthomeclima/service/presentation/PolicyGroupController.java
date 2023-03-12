@@ -31,6 +31,12 @@ public class PolicyGroupController {
 	@Autowired
 	private SmartRoomService smartRoomService;
 	
+	@GetMapping
+	@ResponseBody
+	public List<PolicyGroup> getPolicyGroups() throws BusinessException {
+		return this.policyGroupService.findAll();
+	}
+	
 	@GetMapping("/{id}")
 	@ResponseBody
 	public PolicyGroup getPolicyGroup(@PathVariable("id") Integer id) throws BusinessException {

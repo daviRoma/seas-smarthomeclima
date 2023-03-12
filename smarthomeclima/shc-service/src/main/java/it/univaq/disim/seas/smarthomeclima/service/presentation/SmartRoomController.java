@@ -3,7 +3,10 @@ package it.univaq.disim.seas.smarthomeclima.service.presentation;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -62,8 +65,10 @@ public class SmartRoomController {
 	}
 	
 	@PostMapping
-	public void create(@RequestBody SmartRoom request) throws BusinessException {
+	@ResponseBody
+	public ResponseEntity<Object> create(@RequestBody SmartRoom request) throws BusinessException {
 		this.service.createSmartRoom(request);
+		return new ResponseEntity<>("Smart Room created succesfully", HttpStatus.OK);
 	}
 	
 	@PutMapping
@@ -71,9 +76,12 @@ public class SmartRoomController {
 		this.service.updateSmartRoom(request);
 	}
 	
+	@CrossOrigin(origins = "http://localhost:4200")
 	@DeleteMapping("/{id}")
-	public void delete(@PathVariable("id") Integer id) throws BusinessException {
+	@ResponseBody
+	public ResponseEntity<Object> delete(@PathVariable("id") Integer id) throws BusinessException {
 		this.service.deleteSmartRoom(id);
+		return new ResponseEntity<>("Smart Room succesfully cancelled", HttpStatus.OK);
 	}
 
 }
