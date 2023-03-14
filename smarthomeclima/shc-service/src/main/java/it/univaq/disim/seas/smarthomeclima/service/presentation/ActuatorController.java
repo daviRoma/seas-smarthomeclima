@@ -2,7 +2,11 @@ package it.univaq.disim.seas.smarthomeclima.service.presentation;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,6 +28,7 @@ import it.univaq.disim.seas.smarthomeclima.service.model.ActuatorRequest;
 @Controller
 @RequestMapping("/actuators")
 public class ActuatorController {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ActuatorController.class);
 
 	@Autowired
 	private SmartRoomService smartRoomService;
@@ -46,6 +51,8 @@ public class ActuatorController {
 	@CrossOrigin(origins = "http://localhost:4200")
 	@PostMapping
 	public void createActuator(@RequestBody ActuatorRequest request) throws BusinessException {
+		LOGGER.info("[ActuatorController]::[createActuator]");
+		
 		SmartRoom sm = this.smartRoomService.findById(request.getSmartRoomId());
 		
 		for (Actuator act : request.getActuators()) {
@@ -56,17 +63,26 @@ public class ActuatorController {
 	
 	@CrossOrigin(origins = "http://localhost:4200")
 	@PutMapping
-	public void updateActuator(@RequestBody ActuatorRequest request) throws BusinessException {
+	public ResponseEntity<Object> updateActuator(@RequestBody ActuatorRequest request) throws BusinessException {
+		LOGGER.info("[ActuatorController]::[updateActuator]");
+		
 		SmartRoom sm = this.smartRoomService.findById(request.getSmartRoomId());
 		
 		for (Actuator act : request.getActuators()) {
 			act.setSmartRoom(sm);
 			this.actuatorService.updateActuator(act);
 		}
+		return new ResponseEntity<>("Actuator updated succesfully", HttpStatus.OK);
 	}
 	
-	@DeleteMapping("/{id}")
-	public void deleteActuator(@PathVariable("id") Integer id) throws BusinessException {
-		this.actuatorService.deleteActuator(id);
+	@CrossOrigin(origins = "http://localhost:4200")
+	@DeleteMapping
+	public ResponseEntity<Object> deleteActuator(@RequestBody ActuatorRequest request) throws BusinessException {
+		LOGGER.info("[ActuatorController]::[deleteActuator]");
+		
+		for (Actuator act : request.getActuators()) {
+			this.actuatorService.deleteActuator(act.getId());
+		}
+		return new ResponseEntity<>("Actuator succesfully deleted.", HttpStatus.OK);
 	}
 }

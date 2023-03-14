@@ -64,6 +64,7 @@ public class SmartRoomController {
 		return sm.getPolicyGroups();
 	}
 	
+	@CrossOrigin(origins = "http://localhost:4200")
 	@PostMapping
 	@ResponseBody
 	public ResponseEntity<Object> create(@RequestBody SmartRoom request) throws BusinessException {
@@ -71,6 +72,7 @@ public class SmartRoomController {
 		return new ResponseEntity<>("Smart Room created succesfully", HttpStatus.OK);
 	}
 	
+	@CrossOrigin(origins = "http://localhost:4200")
 	@PutMapping
 	public void update(@RequestBody SmartRoom request) throws BusinessException {
 		this.service.updateSmartRoom(request);

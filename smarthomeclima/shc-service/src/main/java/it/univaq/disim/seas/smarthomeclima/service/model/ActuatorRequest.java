@@ -14,7 +14,9 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode
 @Builder
 public class ActuatorRequest {
+	@JsonProperty("smartRoomId")
 	private Integer smartRoomId;
+	@JsonProperty("actuators")
 	private List<Actuator> actuators;
 	
 	@JsonCreator
