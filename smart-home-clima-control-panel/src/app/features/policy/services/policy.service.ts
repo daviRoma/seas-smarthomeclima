@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { NGXLogger } from 'ngx-logger';
 import { Observable } from 'rxjs';
 
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { serverConfiguration } from 'src/app/config/server.config';
 
@@ -68,7 +68,14 @@ export class PolicyService {
   public deletePolicy(request: PolicyRequest): Observable<any> {
     this.logger.debug('PolicyService', 'deletePolicy', request);
     const url = `${this.BASE_URL}/policies`;
-    return this.httpClient.delete<any>(url, { body: request });
+
+    const options = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+      }),
+      body: request
+    };
+    return this.httpClient.delete<any>(url, options);
   }
 
 }

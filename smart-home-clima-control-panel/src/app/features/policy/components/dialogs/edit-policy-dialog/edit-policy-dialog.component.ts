@@ -22,7 +22,8 @@ export class EditPolicyDialogComponent implements OnInit {
   public smartRoom: SmartRoom;
   public policyGroup: PolicyGroup;
   public policies!: Policy[];
-  public deletedPolicies!: Policy[];
+
+  private deletedPolicies!: Policy[];
 
   constructor(
     public dialogRef: MatDialogRef<EditPolicyDialogComponent>,
@@ -31,10 +32,11 @@ export class EditPolicyDialogComponent implements OnInit {
   ) {
     this.dialogConfig = this.data;
     this.smartRoom = this.data.smartRoom;
-    this.policyGroup = this.smartRoom.policyGroups ? this.smartRoom.policyGroups[0] : new PolicyGroup();
+    this.policyGroup = this.data.item;
 
-    this.policies = [ ...this.policyGroup.policies ? this.policyGroup.policies : []];
+    this.policies = this.policyGroup.policies ? JSON.parse(JSON.stringify(this.policyGroup.policies)): [];
 
+    this.deletedPolicies = [];
   }
 
   ngOnInit(): void {
@@ -50,14 +52,14 @@ export class EditPolicyDialogComponent implements OnInit {
   deletePolicy(sensorId: number) {
     let index = this.policies?.findIndex(sensor => sensor.id == sensorId);
     if (index > -1) {
-      this.policies.splice(index, 1);
       if (this.policies[index].id) this.deletedPolicies.push(this.policies[index]);
+      this.policies.splice(index, 1);
     }
   }
 
   confirm(): void {
 
-    const payloads = {
+    let payloads = {
       new: { 
         policies: this.policies.filter( s => s.id == null), 
         smartRoomId: this.smartRoom.id, 
@@ -74,18 +76,52 @@ export class EditPolicyDialogComponent implements OnInit {
         policyGroupId: this.policyGroup.id 
       } as PolicyRequest
     };
-
-    if (payloads.new.policies && payloads.new.policies.length) this.store.dispatch(PolicyNewAction({ payload: payloads.new }));
-    if (payloads.update.policies && payloads.update.policies.length) this.store.dispatch(PolicyUpdateAction({ payload: payloads.update }));
-    if (payloads.delete.policies && payloads.update.policies.length) this.store.dispatch(PolicyDeleteAction({ payload: payloads.delete }));
+    payloads = this.transformPolicyDatetime(payloads);
+    console.log('payloads', payloads);
+    if (payloads.new.policies && payloads.new.policies.length) this.store.dispatch(PolicyNewAction(payloads.new));
+    if (payloads.update.policies && payloads.update.policies.length) this.store.dispatch(PolicyUpdateAction(payloads.update));
+    if (payloads.delete.policies && payloads.delete.policies.length) this.store.dispatch(PolicyDeleteAction(payloads.delete));
+    
+    this.dialogRef.close({ result: 'close_after_update' });
   }
 
-  closeDialog(): void {
-    this.dialogRef.close({ result: 'close_cancel' });
-  }
-
-  cancel(): void {
+  public cancel(): void {
     this.closeDialog();
   }
 
+  private closeDialog(): void {
+    this.dialogRef.close({ result: 'close_cancel' });
+  }
+
+  private transformPolicyDatetime(payloads: any): any {
+    //2023-02-01 01:00:00
+
+    payloads.new.policies = payloads.new.policies.map((p: any) => {
+      let start: Date = new Date();
+      let end: Date = new Date();
+      start.setHours(Number(p.startHour.split(":")[0]));
+      start.setMinutes(Number(p.startHour.split(":")[1]));
+      end.setHours(Number(p.endHour.split(":")[0]));
+      end.setMinutes(Number(p.endHour.split(":")[1]));
+
+      return { ...p, startHour: Utility.dateToString(start), endHour: Utility.dateToString(end) };
+    });
+
+    payloads.update.policies = payloads.update.policies.map((p: any) => {
+      let start: Date = new Date();
+      let end: Date = new Date();
+      start.setHours(Number(p.startHour.split(":")[0]));
+      start.setMinutes(Number(p.startHour.split(":")[1]));
+      end.setHours(Number(p.endHour.split(":")[0]));
+      end.setMinutes(Number(p.endHour.split(":")[1]));
+
+      return { ...p, startHour: Utility.dateToString(start), endHour: Utility.dateToString(end) };
+    });
+
+    payloads.delete.policies = payloads.delete.policies.map((p: any) => {
+      return { ...p, startHour: null, endHour: null };
+    });
+
+    return payloads;
+  }
 }

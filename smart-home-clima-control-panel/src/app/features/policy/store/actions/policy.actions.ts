@@ -51,7 +51,7 @@ export const PolicyLoadOneFailureAction = createAction(
 
 export const PolicyNewAction = createAction(
   PolicyActionTypes.NEW,
-  props<{payload: PolicyRequest}>()
+  props<PolicyRequest>()
 );
 
 export const PolicyNewSuccessAction = createAction(
@@ -66,7 +66,7 @@ export const PolicyNewFailureAction = createAction(
 
 export const PolicyUpdateAction = createAction(
   PolicyActionTypes.UPDATE,
-  props<{payload: PolicyRequest}>()
+  props<PolicyRequest>()
 );
 
 export const PolicyUpdateFailureAction = createAction(
@@ -76,7 +76,7 @@ export const PolicyUpdateFailureAction = createAction(
 
 export const PolicyDeleteAction = createAction(
   PolicyActionTypes.DELETE,
-  props<{payload: PolicyRequest}>()
+  props<PolicyRequest>()
 );
 
 export const PolicyDeleteSuccesAction = createAction(

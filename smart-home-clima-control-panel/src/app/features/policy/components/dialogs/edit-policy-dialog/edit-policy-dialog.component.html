@@ -11,7 +11,7 @@
                         <div class="form-group">
                             <mat-form-field>
                                 <mat-label>Start Hour</mat-label>
-                                <input matInput type="time" [(ngModel)]="policy.startHour">
+                                <input matInput type="time" [(ngModel)]="policy.startHour" [disabled]="policy.active">
                             </mat-form-field>
                         </div>
                     </div>
@@ -20,7 +20,7 @@
                         <div class="form-group">
                             <mat-form-field>
                                 <mat-label>End Hour</mat-label>
-                                <input matInput type="time" [(ngModel)]="policy.endHour">
+                                <input matInput type="time" [(ngModel)]="policy.endHour" [disabled]="policy.active">
                             </mat-form-field>
                         </div>
                     </div>
@@ -29,7 +29,7 @@
                         <div class="form-group">
                             <mat-form-field appearance="fill">
                                 <mat-label>Optimal Temperature</mat-label>
-                                <input matInput type="number" [(ngModel)]="policy.optimalTemperature">
+                                <input matInput type="number" [(ngModel)]="policy.optimalTemperature" [disabled]="policy.active">
                             </mat-form-field>
                         </div>
                     </div>
@@ -47,7 +47,7 @@
 
                     <!-- Delete button -->
                     <div class="col-3">
-                        <button mat-icon-button class="" style="color:red;" (click)="deletePolicy(policy.id)">
+                        <button mat-icon-button class="delete-policy-button {{ policy.active ? 'disabled' : ''}}" (click)="deletePolicy(policy.id)" [disabled]="policy.active">
                             <i class="fa fa-minus-square" aria-hidden="true"></i>
                         </button>
                     </div>

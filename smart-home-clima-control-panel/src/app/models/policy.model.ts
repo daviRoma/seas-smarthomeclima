@@ -7,7 +7,7 @@ export class Policy {
 	optimalTemperature?: number;
 	startHour!: any;
 	endHour!: any;
-	active?: boolean;
+	active!: boolean;
 	policyGroup?: PolicyGroup;
 }
 

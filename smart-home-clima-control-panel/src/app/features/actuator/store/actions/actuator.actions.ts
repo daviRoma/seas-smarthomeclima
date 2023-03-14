@@ -51,7 +51,7 @@ export const ActuatorLoadOneFailureAction = createAction(
 
 export const ActuatorNewAction = createAction(
   ActuatorActionTypes.NEW,
-  props<{payload: ActuatorRequest}>()
+  props<ActuatorRequest>()
 );
 
 export const ActuatorNewSuccessAction = createAction(
@@ -66,7 +66,7 @@ export const ActuatorNewFailureAction = createAction(
 
 export const ActuatorUpdateAction = createAction(
   ActuatorActionTypes.UPDATE,
-  props<{payload: ActuatorRequest}>()
+  props<ActuatorRequest>()
 );
 
 export const ActuatorUpdateFailureAction = createAction(
@@ -76,7 +76,7 @@ export const ActuatorUpdateFailureAction = createAction(
 
 export const ActuatorDeleteAction = createAction(
   ActuatorActionTypes.DELETE,
-  props<{payload: ActuatorRequest}>()
+  props<ActuatorRequest>()
 );
 
 export const ActuatorDeleteSuccesAction = createAction(

@@ -1,0 +1,6 @@
+.delete-policy-button {
+    color: red;
+}
+.delete-policy-button.disabled {
+    color: #7f7f7f;
+}

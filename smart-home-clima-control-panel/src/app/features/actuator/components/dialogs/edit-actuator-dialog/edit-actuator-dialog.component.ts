@@ -33,6 +33,8 @@ export class EditActuatorDialogComponent implements OnInit {
     private store: Store<AppState>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
+    this.dialogRef.disableClose = false;
+
     this.dialogConfig = this.data;
     this.smartRoom = this.data.smartRoom;
 
@@ -62,9 +64,11 @@ export class EditActuatorDialogComponent implements OnInit {
       delete: { actuators: this.deletedActuators, smartRoomId: this.smartRoom.id } as ActuatorRequest
     };
 
-    if (payloads.new.actuators) this.store.dispatch(ActuatorNewAction({ payload: payloads.new }));
-    if (payloads.update.actuators) this.store.dispatch(ActuatorUpdateAction({ payload: payloads.update }));
-    if (payloads.delete.actuators) this.store.dispatch(ActuatorDeleteAction({ payload: payloads.delete }));
+    if (payloads.new.actuators && payloads.new.actuators.length) this.store.dispatch(ActuatorNewAction(payloads.new));
+    if (payloads.update.actuators && payloads.update.actuators.length) this.store.dispatch(ActuatorUpdateAction(payloads.update));
+    if (payloads.delete.actuators && payloads.delete.actuators.length) this.store.dispatch(ActuatorDeleteAction(payloads.delete));
+    
+    this.dialogRef.close({ result: 'close_after_update'});
   }
 
   closeDialog(): void {
