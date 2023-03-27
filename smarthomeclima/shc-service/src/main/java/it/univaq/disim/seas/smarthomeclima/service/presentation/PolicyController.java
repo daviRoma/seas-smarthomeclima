@@ -75,15 +75,15 @@ public class PolicyController {
 		
 		for (Policy p : request.getPolicies()) {
 			p.setPolicyGroup(group);
-			this.policyService.upsertMultiplePolicy(request.getPolicies());;
 		}
+		this.policyService.upsertMultiplePolicy(request.getPolicies());
 		return new ResponseEntity<>("Policy updated successfullty.", HttpStatus.OK);
 	}
 	
 	@CrossOrigin(origins = "http://localhost:4200")
 	@DeleteMapping
 	public ResponseEntity<Object> deletePolicyGroup(@RequestBody PolicyRequest request) throws BusinessException {
-		LOGGER.info("[PolicyController]::[deletePolicyGroup]");
+		LOGGER.info("[PolicyController]::[deletePolicy]");
 		
 		for (Policy p : request.getPolicies()) {
 			this.policyService.deletePolicy(p.getId());

@@ -2,8 +2,13 @@ package it.univaq.disim.seas.smarthomeclima.service.presentation;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +30,8 @@ import it.univaq.disim.seas.smarthomeclima.service.model.PolicyGroupRequest;
 @RequestMapping("/policy_groups")
 public class PolicyGroupController {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(PolicyGroupController.class);
+	
 	@Autowired
 	private PolicyGroupService policyGroupService;
 	
@@ -49,28 +56,42 @@ public class PolicyGroupController {
 		return this.policyGroupService.findById(id).getPolicies();
 	}
 	
-	@PostMapping("")
-	public void createPolicyGroup(@RequestBody PolicyGroupRequest request) throws BusinessException {
+	@CrossOrigin(origins = "http://localhost:4200")
+	@PostMapping
+	public ResponseEntity<Object> createPolicyGroup(@RequestBody PolicyGroupRequest request) throws BusinessException {
+		LOGGER.info("[PolicyGroupController]::[createPolicyGroup]");
+
 		SmartRoom sm = this.smartRoomService.findById(request.getSmartRoomId());
 		
-		PolicyGroup policyGroup = request.getPolicyGroup();
-		policyGroup.setSmartRoom(sm);
-		
-		this.policyGroupService.createPolicyGroup(policyGroup);
+		for (PolicyGroup pg : request.getPolicyGroups()) {
+			pg.setSmartRoom(sm);
+			this.policyGroupService.createPolicyGroup(pg);
+		}
+		return new ResponseEntity<>("Policy Groups succesfully created.", HttpStatus.OK);
 	}
 	
-	@PutMapping("")
-	public void updatePolicyGroup(@RequestBody PolicyGroupRequest request) throws BusinessException {
+	@CrossOrigin(origins = "http://localhost:4200")
+	@PutMapping
+	public ResponseEntity<Object> updatePolicyGroup(@RequestBody PolicyGroupRequest request) throws BusinessException {
+		LOGGER.info("[PolicyGroupController]::[updatePolicyGroup]");
+
 		SmartRoom sm = this.smartRoomService.findById(request.getSmartRoomId());
 		
-		PolicyGroup policyGroup = request.getPolicyGroup();
-		policyGroup.setSmartRoom(sm);
-		
-		this.policyGroupService.updatePolicyGroup(policyGroup);
+		for (PolicyGroup pg : request.getPolicyGroups()) {
+			pg.setSmartRoom(sm);
+			this.policyGroupService.updatePolicyGroup(pg);
+		}
+		return new ResponseEntity<>("Policy Groups succesfully updated.", HttpStatus.OK);
 	}
 	
-	@DeleteMapping("/{id}")
-	public void deletePolicyGroup(@PathVariable("id") Integer id) throws BusinessException {
-		this.policyGroupService.deletePolicyGroup(id);
+	@CrossOrigin(origins = "http://localhost:4200")
+	@DeleteMapping
+	public ResponseEntity<Object> deletePolicyGroup(@RequestBody PolicyGroupRequest request) throws BusinessException {
+		LOGGER.info("[PolicyGroupController]::[deletePolicyGroup]");
+		
+		for (PolicyGroup pg : request.getPolicyGroups()) {
+			this.policyGroupService.deletePolicyGroup(pg.getId());
+		}
+		return new ResponseEntity<>("Policy Groups succesfully deleted.", HttpStatus.OK);
 	}
 }

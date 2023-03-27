@@ -27,7 +27,7 @@ import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.Actuator;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.domain.Sensor;
 
 @Component
-public class Monitor extends Thread {
+public class Monitor implements Runnable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Monitor.class);
 
@@ -43,7 +43,7 @@ public class Monitor extends Thread {
 	@Autowired
 	private ObjectMapper objectMapper;
     
-	private boolean isStarted = true; 
+	private volatile boolean isStarted = false; 
     private LocalDateTime clock;
     
     private Map<Integer, SmartRoom> smartRooms;
@@ -60,6 +60,8 @@ public class Monitor extends Thread {
     @Override
     public void run() {
     	LOGGER.info("[Monitor]::[run] --- Run monitoring");
+    	
+    	this.isStarted = true;
     	
     	// Get all smart room 
     	try {    		
@@ -112,13 +114,11 @@ public class Monitor extends Thread {
         }
 	}
     
-	public void terminate() throws InterruptedException {
+	/**
+	 * Termiate thread.
+	 */
+	public void terminate() {
 		this.isStarted = false;
-		this.join();
-		Thread.currentThread().interrupt();
-	    if (Thread.interrupted()) {
-	    	LOGGER.info("[Monitor]::[stopped]");
-	    }
 	}
 
     /**

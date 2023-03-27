@@ -38,7 +38,7 @@ import it.univaq.disim.seas.smarthomeclima.knowledgebase.model.ChannelPayload;
 import it.univaq.disim.seas.smarthomeclima.knowledgebase.model.ChannelType;
 
 @Component
-public class Simulator extends Thread {
+public class Simulator implements Runnable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Simulator.class);
 
 	@Autowired
@@ -57,8 +57,8 @@ public class Simulator extends Thread {
 	private ObjectMapper objectMapper = new ObjectMapper();
 	
 	private List<SmartRoom> smartRooms;
-	private boolean isStarted = false;
-		
+	private volatile boolean isStarted = false;
+	
 	public Simulator() {}
 	
 	@Override
@@ -112,8 +112,9 @@ public class Simulator extends Thread {
 				this.simulation();				
 				Thread.sleep(30000);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
-			    Thread.currentThread().interrupt();  //set the flag back to true
+				LOGGER.error("[Simulator]::[run] --- Simulator started", e);
+//				e.printStackTrace();
+//			    Thread.currentThread().interrupt();  //set the flag back to true
 				this.isStarted = false;
 			} catch (BusinessException e) {
 				e.printStackTrace();
@@ -237,15 +238,9 @@ public class Simulator extends Thread {
 	 
 	/**
 	 * Termiate thread.
-	 * @throws InterruptedException
 	 */
-	public void terminate() throws InterruptedException {
+	public void terminate() {
 		this.isStarted = false;
-		this.join();
-		Thread.currentThread().interrupt();
-	    if (Thread.interrupted()) {
-	    	LOGGER.info("[Simulator]::[stopped]");
-	    }
 	}
 	
 	/**
