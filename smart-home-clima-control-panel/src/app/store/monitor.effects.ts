@@ -34,11 +34,11 @@ export class MonitorEffects {
         this.actions.pipe(
             ofType(MonitorActionTypes.STOP_MONITORING),
             switchMap(() =>
-                this.monitoringService.startMonitoring().pipe(
+                this.monitoringService.stopMonitoring().pipe(
                     map(
-                        (response: any) => ({ type: MonitorActionTypes.STOP_MONITORING, payload: { id: 1, isStarted: false, channels: [] } as Monitor})
+                        (response: any) => ({ type: MonitorActionTypes.STOP_MONITORING_SUCCESS, payload: { id: 1, isStarted: false, channels: [] } as Monitor})
                     ),
-                    catchError((error) => of({type: MonitorActionTypes.STOP_MONITORING, payload: error}))
+                    catchError((error) => of({type: MonitorActionTypes.STOP_MONITORING_FAILURE, payload: error}))
                 )
             )
         )

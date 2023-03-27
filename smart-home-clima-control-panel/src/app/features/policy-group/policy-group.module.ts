@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { EditPolicyGroupDialogComponent } from './components/dialogs/edit-policy-group-dialog/edit-policy-group-dialog.component';
-import { DeletePolicyGroupDialogComponent } from './components/dialogs/delete-policy-group-dialog/delete-policy-group-dialog.component';
 
 import {
   MatDialogModule,
@@ -13,6 +12,7 @@ import {
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
@@ -25,8 +25,7 @@ import {
 
 @NgModule({
   declarations: [
-    EditPolicyGroupDialogComponent,
-    DeletePolicyGroupDialogComponent
+    EditPolicyGroupDialogComponent
   ],
   imports: [
     CommonModule,
@@ -36,12 +35,13 @@ import {
     MatDatepickerModule,
     MatNativeDateModule,
     MatInputModule,
+    MatIconModule,
     MatCheckboxModule,
     MatSelectModule,
     MatButtonModule
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  exports: [EditPolicyGroupDialogComponent, DeletePolicyGroupDialogComponent],
+  exports: [EditPolicyGroupDialogComponent],
   providers: [
     MatDatepickerModule,
     { provide: OverlayContainer, useClass: FullscreenOverlayContainer },

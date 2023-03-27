@@ -51,7 +51,7 @@ export const PolicyGroupLoadOneFailureAction = createAction(
 
 export const PolicyGroupNewAction = createAction(
   PolicyGroupActionTypes.NEW,
-  props<{payload: PolicyGroupRequest}>()
+  props<PolicyGroupRequest>()
 );
 
 export const PolicyGroupNewSuccessAction = createAction(
@@ -66,7 +66,7 @@ export const PolicyGroupNewFailureAction = createAction(
 
 export const PolicyGroupUpdateAction = createAction(
   PolicyGroupActionTypes.UPDATE,
-  props<{payload: PolicyGroupRequest}>()
+  props<PolicyGroupRequest>()
 );
 
 export const PolicyGroupUpdateFailureAction = createAction(
@@ -76,7 +76,7 @@ export const PolicyGroupUpdateFailureAction = createAction(
 
 export const PolicyGroupDeleteAction = createAction(
   PolicyGroupActionTypes.DELETE,
-  props<{payload: PolicyGroupRequest}>()
+  props<PolicyGroupRequest>()
 );
 
 export const PolicyGroupDeleteSuccesAction = createAction(

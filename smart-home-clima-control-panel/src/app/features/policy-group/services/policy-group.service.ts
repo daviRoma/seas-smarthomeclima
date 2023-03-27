@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { NGXLogger } from 'ngx-logger';
 import { Observable } from 'rxjs';
 
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { serverConfiguration } from 'src/app/config/server.config';
 
@@ -66,9 +66,15 @@ export class PolicyGroupService {
    * @param request : PolicyGroupRequest
    */
   public deletePolicyGroup(request: PolicyGroupRequest): Observable<any> {
-    this.logger.debug('PolicyGroupService', 'deletePolicyGroup', request.policyGroup.id);
-    const url = `${this.BASE_URL}/policy_groups/${request.policyGroup.id}`;
-    return this.httpClient.delete<any>(url, { });
+    this.logger.debug('PolicyGroupService', 'deletePolicyGroup', request);
+    const url = `${this.BASE_URL}/policy_groups`;
+    const options = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+      }),
+      body: request
+    };
+    return this.httpClient.delete<any>(url, options);
   }
 
 }

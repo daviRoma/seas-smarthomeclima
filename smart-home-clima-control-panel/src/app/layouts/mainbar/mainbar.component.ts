@@ -51,6 +51,7 @@ export class MainbarComponent implements OnInit {
 
   stopSmartHomeMonitoring(): void {
     this.store.dispatch(MonitorStopMonitoringAction());
+    this.isStarting = false;
   }
 
   refreshdata(): void {

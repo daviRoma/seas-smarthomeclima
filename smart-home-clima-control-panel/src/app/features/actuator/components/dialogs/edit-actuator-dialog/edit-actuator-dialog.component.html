@@ -43,9 +43,9 @@
         </div>
     </ng-container>
     <div *ngIf="actuators && actuators.length < 3" class="row">
-        <div class="col-12">
-            <button mat-icon-button color="primary" (click)="addActuator()">
-                <i class="fa fa-plus-square" aria-hidden="true"></i>
+        <div class="col-12 mb-2 pb-2 text-center">
+            <button mat-fab color="primary" aria-label="Add Actuator" (click)="addActuator()">
+                <mat-icon>add</mat-icon>
             </button>
         </div>
     </div>

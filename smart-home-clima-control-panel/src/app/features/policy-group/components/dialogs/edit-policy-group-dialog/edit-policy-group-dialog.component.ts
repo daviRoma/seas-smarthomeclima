@@ -1,5 +1,4 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -8,7 +7,7 @@ import { SmartRoom } from 'src/app/models/smart-room.model';
 import { PolicyGroup, PolicyGroupRequest } from 'src/app/models/policy-group.model';
 import { AppState } from 'src/app/state/app.state';
 
-import { PolicyGroupNewAction, PolicyGroupUpdateAction } from 'src/app/features/policy-group/store/actions/policy-group.actions';
+import { PolicyGroupDeleteAction, PolicyGroupNewAction, PolicyGroupUpdateAction } from 'src/app/features/policy-group/store/actions/policy-group.actions';
 
 export enum Seasons {
   Winter = 'WINTER',
@@ -30,15 +29,16 @@ export class EditPolicyGroupDialogComponent implements OnInit {
   
   public dialogConfig: any;
   public smartRoom: SmartRoom;
-  public policyGroup: PolicyGroup
-  public policyGroupForm: FormGroup;
+  public policyGroup: PolicyGroup;
+  public policyGroups: PolicyGroup[];
 
   public modes: any = Modes;
   public seasons: any = Seasons;
 
+  private deletedPolicyGroups!: PolicyGroup[];
+
   constructor(
     public dialogRef: MatDialogRef<EditPolicyGroupDialogComponent>,
-    private formBuilder: FormBuilder,
     private store: Store<AppState>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
@@ -47,33 +47,46 @@ export class EditPolicyGroupDialogComponent implements OnInit {
 
     this.policyGroup = this.data.item;
 
-    this.policyGroupForm = this.formBuilder.group({
-      season: [this.policyGroup.season, [Validators.required]],
-      mode: [this.policyGroup.mode, [Validators.required]],
-      active: [this.policyGroup.active],
-      startDate: [this.policyGroup.startDate],
-      endDate: [this.policyGroup.endDate]
-    });
+    this.policyGroups = this.data.smartRoom.policyGroups && this.data.smartRoom.policyGroups.length ? JSON.parse(JSON.stringify(this.data.smartRoom.policyGroups)) : [new PolicyGroup()];
+    this.deletedPolicyGroups = [];
+  }
 
-    // Edit case
-    if (this.data.smartroom) {
-      this.smartRoom = {...this.data.smartRoom};
-      this.policyGroupForm.patchValue(this.policyGroup);
+  ngOnInit(): void {}
+
+  addPolicyGroup() {
+    this.policyGroups?.push(new PolicyGroup());
+  }
+
+  deletePolicyGroup(groupId: number) {
+    let index = this.policyGroups?.findIndex(group => group.id == groupId);
+    if (index > -1) {
+      if (this.policyGroups[index].id) this.deletedPolicyGroups.push(this.policyGroups[index]);
+      this.policyGroups.splice(index, 1);
     }
   }
 
-  ngOnInit(): void {
+  confirm(): void {
+
+    let payloads = {
+      new: { 
+        policyGroups: this.policyGroups.filter( g => g.id == null), 
+        smartRoomId: this.smartRoom.id, 
+      } as PolicyGroupRequest,
+      update: { 
+        policyGroups: this.policyGroups.filter( g => g.id != null), 
+        smartRoomId: this.smartRoom.id,
+      } as PolicyGroupRequest,
+      delete: { 
+        policyGroups: this.deletedPolicyGroups, 
+        smartRoomId: this.smartRoom.id,
+      } as PolicyGroupRequest
+    };
+
+    if (payloads.new.policyGroups && payloads.new.policyGroups.length) this.store.dispatch(PolicyGroupNewAction(payloads.new));
+    if (payloads.update.policyGroups && payloads.update.policyGroups.length) this.store.dispatch(PolicyGroupUpdateAction(payloads.update));
+    if (payloads.delete.policyGroups && payloads.delete.policyGroups.length) this.store.dispatch(PolicyGroupDeleteAction(payloads.delete));
     
-  }
-
-  onSubmit(event: any): void {
-    event.preventDefault();
-
-    const payload = { policyGroup: this.policyGroupForm.value as PolicyGroup, smartRoomId: this.smartRoom.id } as PolicyGroupRequest;
-
-    this.dialogConfig.operation === 'new' ?
-      this.store.dispatch(PolicyGroupNewAction({payload})) :
-      this.store.dispatch(PolicyGroupUpdateAction({payload}));
+    this.dialogRef.close({ result: 'close_after_update' });
   }
 
   closeDialog(): void {

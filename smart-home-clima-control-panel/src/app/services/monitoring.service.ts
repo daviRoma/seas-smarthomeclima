@@ -35,6 +35,6 @@ export class MonitoringService {
     this.logger.debug('MonitoringService', 'stopMonitoring', 'starting...');
     const url = `${this.BASE_URL}/monitoring/stop`;
 
-    return this.httpClient.post<any>(url, null, { });
+    return this.httpClient.get<any>(url, { });
   }
 }

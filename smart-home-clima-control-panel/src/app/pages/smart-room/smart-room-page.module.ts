@@ -6,7 +6,7 @@ import { SmartRoomModule } from 'src/app/features/smart-room/smart-room.module';
 
 import {
   MatDialogModule,
-  MAT_DIALOG_DEFAULT_OPTIONS,
+  MAT_DIALOG_DEFAULT_OPTIONS, 
 } from '@angular/material/dialog';
 
 import { MatIconModule } from '@angular/material/icon';

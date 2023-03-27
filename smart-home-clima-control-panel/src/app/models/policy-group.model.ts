@@ -13,6 +13,6 @@ export class PolicyGroup {
 }
 
 export class PolicyGroupRequest {
-    policyGroup!: PolicyGroup;
+    policyGroups!: PolicyGroup[];
     smartRoomId!: number;
 }

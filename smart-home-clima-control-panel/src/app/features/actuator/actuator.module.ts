@@ -10,6 +10,7 @@ import {
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
@@ -33,6 +34,7 @@ import { EditActuatorDialogComponent } from './components/dialogs/edit-actuator-
     MatDatepickerModule,
     MatNativeDateModule,
     MatInputModule,
+    MatIconModule,
     MatCheckboxModule,
     MatSelectModule,
     MatButtonModule

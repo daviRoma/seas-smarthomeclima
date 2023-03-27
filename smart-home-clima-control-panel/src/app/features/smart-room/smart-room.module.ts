@@ -60,7 +60,6 @@ import { NgChartsModule } from 'ng2-charts';
     MatInputModule,
     MatCheckboxModule,
     MatSelectModule,
-    MatButtonModule,
     MatProgressSpinnerModule
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

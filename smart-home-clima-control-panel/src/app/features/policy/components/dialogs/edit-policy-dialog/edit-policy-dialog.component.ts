@@ -49,8 +49,8 @@ export class EditPolicyDialogComponent implements OnInit {
     this.policies?.push(new Policy());
   }
 
-  deletePolicy(sensorId: number) {
-    let index = this.policies?.findIndex(sensor => sensor.id == sensorId);
+  deletePolicy(policyId: number) {
+    let index = this.policies?.findIndex(policy => policy.id == policyId);
     if (index > -1) {
       if (this.policies[index].id) this.deletedPolicies.push(this.policies[index]);
       this.policies.splice(index, 1);
@@ -77,7 +77,7 @@ export class EditPolicyDialogComponent implements OnInit {
       } as PolicyRequest
     };
     payloads = this.transformPolicyDatetime(payloads);
-    console.log('payloads', payloads);
+
     if (payloads.new.policies && payloads.new.policies.length) this.store.dispatch(PolicyNewAction(payloads.new));
     if (payloads.update.policies && payloads.update.policies.length) this.store.dispatch(PolicyUpdateAction(payloads.update));
     if (payloads.delete.policies && payloads.delete.policies.length) this.store.dispatch(PolicyDeleteAction(payloads.delete));
