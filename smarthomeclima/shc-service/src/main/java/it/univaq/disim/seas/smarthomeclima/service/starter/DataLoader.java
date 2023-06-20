@@ -124,7 +124,7 @@ public class DataLoader implements CommandLineRunner {
 		pg.setMode(Mode.ECO);
 		pg.setSeason(Season.WINTER);
 		pg.setStartDate(LocalDate.of(2023, 2, 1));
-		pg.setEndDate(LocalDate.of(2023, 4, 15));
+		pg.setEndDate(LocalDate.of(2023, 4, 20));
 		pg.setSmartRoom(sr);
 		policyGroupService.createPolicyGroup(pg);
 		
