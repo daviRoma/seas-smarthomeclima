@@ -12,7 +12,7 @@ in such a way as to immediately identify the situation in which the room is loca
 
 Please note that this is only an example application developed for educational purposes and for a restricted domain.
 
-For a complete description of the application you can refer to [a link](https://github.com/daviRoma/seas-smarthomeclima/SmartHomeClima_Documentation.pdf).
+For a complete description of the application you can refer to the [SHC Documentation](https://github.com/daviRoma/seas-smarthomeclima/blob/main/SmartHomeClima_Documentation.pdf).
 
 ## Characteristics
 The software has been completely implemented through Java and Angular2+. The following technologies
