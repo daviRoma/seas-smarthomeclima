@@ -25,6 +25,11 @@ messaging protocols.
 
 The Java project was developed using the module dependency pattern using Maven. The root project has the pom.xml containing all the project module, while each module’s pom.xml contains the dependency to the other module.
 
+### Project Structure
+- smart-home-clima-control-panel: is the Angular application which represents the system control panel, in which the user can configure the rooms, the devices, the policies for each room and so on.
+- smarthomeclima: is the Java application.
+
+
 In the next section will be explained how to install the software on your own machine.
 
 ## Installation
